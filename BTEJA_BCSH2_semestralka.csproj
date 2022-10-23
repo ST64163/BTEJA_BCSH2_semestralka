@@ -8,9 +8,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Interpreter\Lexer\" />
-    <Folder Include="Interpreter\Parser\" />
-    <Folder Include="Interpreter\Tokens\" />
+    <Compile Remove="Interpreter\**" />
+    <EmbeddedResource Remove="Interpreter\**" />
+    <None Remove="Interpreter\**" />
+    <Page Remove="Interpreter\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="LexicalAnalysis\" />
+    <Folder Include="SemanticAnalysis\" />
   </ItemGroup>
 
 </Project>

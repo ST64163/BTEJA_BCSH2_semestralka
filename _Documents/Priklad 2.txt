@@ -1,0 +1,58 @@
+fun DejAnoNe(vyraz : Boolean) : String {
+	var retezec : String;
+	if (vyraz) {
+		retezec = "Ano";
+	} else {
+		retezec = "Ne";
+	}
+	return retezec;
+}
+
+fun VypisPorovnani(a : Double, b : Double) : Int {
+	printLn("a > b  -> " + DejAnoNe(a > b));
+	printLn("a < b  -> " + DejAnoNe(a < b));
+	printLn("a >= b -> " + DejAnoNe(a >= b));
+	printLn("a <= b -> " + DejAnoNe(a <= b));
+	printLn("a = b  -> " + DejAnoNe(a == b));
+	printLn("a ≠ b  -> " + DejAnoNe(a != b));
+	return 1;
+}
+
+fun VypisVypocty(a : Double, b : Double) : Int {
+	printLn("a + b = " + doubleToStr(a + b));
+	printLn("a - b = " + doubleToStr(a - b));
+	printLn("a * b = " + doubleToStr(a * b));
+	printLn("a / b = " + doubleToStr(a / b));
+	printLn("a mod b = " + doubleToStr(a % b));
+	printLn("a + a + b = " + doubleToStr(a + a + b));
+	printLn("(a + a) + b = " + doubleToStr((a + a) + b));
+	printLn("(a + a) * b = " + doubleToStr((a + a) * b));
+	printLn("(a * a) + b = " + doubleToStr((a * a) + b));
+	printLn("+a = " + doubleToStr(+a));
+	printLn("-a = " + doubleToStr(-a));
+	printLn("+b = " + doubleToStr(+b));
+	printLn("-b = " + doubleToStr(-b));
+	return 1;
+}
+
+var prikaz : String;
+var a : Double;
+var b : Double;
+printLn("Prikazy: vypocty, porovnani, preskoc, konec");
+do {
+	print("Zadejte prikaz: ");
+	prikaz = readLn();
+	if (prikaz == "preskoc") {
+		continue;
+	}
+
+	print("Zedejte cislo a: ");
+	a = strToDouble(readLn());
+	print("Zadejte cislo b: ");
+	b = strToDouble(readLn());
+	if (prikaz == "porovnani") {
+		VypisPorovnani(a, b);
+	} else if (prikaz == "vypocty") {
+		VypisVypocty(a, b);
+	}
+} while (prikaz != "konec");

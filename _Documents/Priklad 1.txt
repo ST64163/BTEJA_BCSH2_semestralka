@@ -1,0 +1,10 @@
+var vyzva : String = "Zadejte retezec: ";
+printLn(vyzva);
+
+var retezec : String = readLn();
+var delka : Int = strLen(retezec);
+    
+printLn("Delka retezce: " + intToStr(delka));
+
+for ( index in 0 until delka)
+	printLn(intToStr(index + 1) + ": " + strIndex(retezec, index));

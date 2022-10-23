@@ -1,0 +1,21 @@
+fun rekurze(i : Double) : Double {
+	if (i == 0.0) return i;
+	return rekurze(i - 0.1);
+}
+
+while (true) {
+	var celeCislo : Int = 10;
+	var cislo : Int = celeCislo;
+	var realCislo : Double = 1.0;
+	var bool1 : Boolean = true;
+	var bool2 : Boolean = (true || false) && true && true;
+	var bool3 : Boolean = celeCislo == cislo || false;
+	var bool4 : Boolean = (celeCislo == cislo) && true;
+	printLn("celeCislo: " + intToStr(celeCislo) + ", realCislo: " + doubleToStr(realCislo));
+	printLn("true -> " + boolToStr(bool1));
+	printLn("(true || false) && true && true -> " + boolToStr(bool2));
+	printLn("10 == 10 || false -> " + boolToStr(bool3));
+	printLn("(10 == 10) && true -> " + boolToStr(bool4));
+	rekurze(1.0);
+	break;
+}
