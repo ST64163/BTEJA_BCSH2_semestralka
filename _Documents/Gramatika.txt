@@ -29,7 +29,7 @@ if		=	'if' '(' expression ')' statement {'else' 'if' '(' expression ')' statemen
 
 for		=	'for' '(' identifier 'in' expression 'until' expression  ')' statement
 ;
-while		=	'while' '(' expression ')' statement
+while	=	'while' '(' expression ')' statement
 ;
 do		=	'do' block 'while' '(' expression ')' ';'
 ;
@@ -39,7 +39,7 @@ expression 		=	secondLevel {('||' | '&&') secondLevel}
 ;
 secondLevel		=	thirdLevel {('==' | '!=' | '<=' | '>=' | '<' | '>') thirdLevel}
 ; 
-thirdLevel		=	[('+' | '-')] fourthLevel {('+' | '-') fourthLevel}
+thirdLevel		=	[('+' | '-' | '!')] fourthLevel {('+' | '-') fourthLevel}
 ;
 fourthLevel		=	fifthLevel {('*' | '/') fifthLevel}
 ;

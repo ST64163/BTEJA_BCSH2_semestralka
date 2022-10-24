@@ -55,4 +55,4 @@ do {
 	} else if (prikaz == "vypocty") {
 		VypisVypocty(a, b);
 	}
-} while (prikaz != "konec");
+} while (!(prikaz == "konec"));

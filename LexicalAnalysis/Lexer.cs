@@ -1,6 +1,7 @@
 ﻿
 using BTEJA_BCSH2_semestralka.Tokens;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace BTEJA_BCSH2_semestralka.LexicalAnalysis;
 
@@ -18,23 +19,29 @@ internal class Lexer
     {
         string currentWord = "";
         char currentChar;
-        Token? oprtr = null;
+        Token? newWord = null;
         bool endOfWord = false;
         do
         {
             currentChar = state.Input[state.Cursor];
             if (char.IsWhiteSpace(currentChar) || char.IsControl(currentChar))
                 endOfWord = true;
-            else if ((oprtr = GetOperatorToken(currentChar, state)) != null)
-                endOfWord = true;
+            else if (!char.IsLetterOrDigit(currentChar))
+            { 
+                if ((newWord = GetStringToken(currentChar, state)) != null)
+                    endOfWord = true;
+                else if ((newWord = GetOperatorToken(currentChar, state)) != null)
+                    endOfWord = true;
+            }
 
             if (endOfWord)
             {
-                state.Tokens.Add(GetToken(currentWord, state));
-                if (oprtr != null) 
+                if (currentWord != "")
+                    state.Tokens.Add(GetToken(currentWord, state));
+                if (newWord != null) 
                 {
-                    state.Tokens.Add(oprtr);
-                    oprtr = null;
+                    state.Tokens.Add(newWord);
+                    newWord = null;
                 }
                 currentWord = "";
                 endOfWord = false;
@@ -47,18 +54,33 @@ internal class Lexer
             state.Tokens.Add(GetToken(currentWord, state));
     }
 
+    private StringToken? GetStringToken(char currentChar, LexerState state)
+    {
+        if (currentChar == '"')
+        {
+            int start = state.Cursor + 1;
+            int end = state.Input.IndexOf('"', start);
+            if (end == -1)
+                end = state.Input.Length;
+            state.Cursor = end;
+            return new StringToken(state.Input[start..end]);
+        }
+        return null;
+    }
+
     private OperatorToken? GetOperatorToken(char currentChar, LexerState state)
     {
-        if (char.IsLetterOrDigit(currentChar))
-            return null;
-        string wanted = currentChar.ToString();
-        OperatorToken? oprtr = FindOperator(wanted);
-        if (oprtr != null && state.Cursor + 1 < state.Input.Length)
+        OperatorToken? oprtr = null;
+        if (!char.IsLetterOrDigit(currentChar))
         {
-            wanted += state.Input[state.Cursor + 1];
-            OperatorToken? pairOperator = FindOperator(wanted);
-            if (pairOperator != null)
-                oprtr = pairOperator;
+            if (state.Cursor + 1 < state.Input.Length)
+            {
+                oprtr = FindOperator("" + currentChar + state.Input[state.Cursor + 1]);
+                if (oprtr != null)
+                    state.Cursor++;
+            }
+            if (oprtr == null)
+                oprtr = FindOperator("" + currentChar);
         }
         return oprtr;
     }
@@ -72,11 +94,9 @@ internal class Lexer
                 token = new BoolToken(true);
             else if (currentWord == "false")
                 token = new BoolToken(false);
-            else if (currentWord.Length > 1 && currentWord.StartsWith('"') && currentWord.EndsWith('"'))
-                token = new StringToken(currentWord[1..^1]);
-            else if (double.TryParse(currentWord, out double real))
+            else if (double.TryParse(currentWord, NumberStyles.Any, CultureInfo.InvariantCulture, out var real))
                 token = new DoubleToken(real);
-            else if (int.TryParse(currentWord, out int whole))
+            else if (int.TryParse(currentWord, NumberStyles.Any, CultureInfo.InvariantCulture, out int whole))
                 token = new IntToken(whole);
             else
                 token = new IdentifierToken(currentWord);

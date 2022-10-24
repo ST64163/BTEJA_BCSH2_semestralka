@@ -30,5 +30,6 @@ internal class OperatorToken : Token
         {"*", TokenType.Multiply},
         {"/", TokenType.Divide},
         {"%", TokenType.Modulo},
+        {"!", TokenType.Not},
     };
 }
