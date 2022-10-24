@@ -1,5 +1,5 @@
 fun rekurze(i : Double) : Double {
-	if (i == 0.0) return i;
+	if (i < 0.001) return 0.0;
 	return rekurze(i - 0.1);
 }
 

@@ -46,13 +46,15 @@ do {
 		continue;
 	}
 
-	print("Zedejte cislo a: ");
-	a = strToDouble(readLn());
-	print("Zadejte cislo b: ");
-	b = strToDouble(readLn());
-	if (prikaz == "porovnani") {
-		VypisPorovnani(a, b);
-	} else if (prikaz == "vypocty") {
-		VypisVypocty(a, b);
+	if (prikaz != "konec") {
+		print("Zedejte cislo a: ");
+		a = strToDouble(readLn());
+		print("Zadejte cislo b: ");
+		b = strToDouble(readLn());
+		if (prikaz == "porovnani") {
+			VypisPorovnani(a, b);
+		} else if (prikaz == "vypocty") {
+			VypisVypocty(a, b);
+		}
 	}
 } while (!(prikaz == "konec"));

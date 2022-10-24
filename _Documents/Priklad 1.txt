@@ -1,5 +1,5 @@
 var vyzva : String = "Zadejte retezec: ";
-printLn(vyzva);
+print(vyzva);
 
 var retezec : String = readLn();
 var delka : Int = strLen(retezec);
