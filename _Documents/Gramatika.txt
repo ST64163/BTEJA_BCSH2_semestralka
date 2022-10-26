@@ -15,13 +15,13 @@ variableAssignment	=	identifier '=' expression
 ;
 functionInvocation	=	identifier '(' [expression {',' expression}] ')'
 ;
-functionDeclaration	=	'fun' identifier '(' paramsDeclaration ')' ':' identifier '{' {statement} '}'
+functionDeclaration	=	'fun' identifier '(' paramsDeclaration ')' ':' identifier block
 ;
-paramsDeclaration		=	[identifier ':' identifier {',' identifier ':' identifier}]
+paramsDeclaration	=	[identifier ':' identifier {',' identifier ':' identifier}]
 ;
-return			=	'return' expression ';'
+return		=	'return' expression ';'
 ;
-block				=	'{' {statement} '}'
+block		=	'{' {statement} '}'
 ;
 
 if		=	'if' '(' expression ')' statement {'else' 'if' '(' expression ')' statement} ['else' statement]

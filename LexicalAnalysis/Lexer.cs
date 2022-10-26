@@ -1,5 +1,5 @@
 ﻿
-using BTEJA_BCSH2_semestralka.Tokens;
+using BTEJA_BCSH2_semestralka.LexicalAnalysis.Tokens;
 using System.Collections.Generic;
 using System.Globalization;
 
@@ -60,10 +60,11 @@ internal class Lexer
         {
             int start = state.Cursor + 1;
             int end = state.Input.IndexOf('"', start);
-            if (end == -1)
-                end = state.Input.Length;
-            state.Cursor = end;
-            return new StringToken(state.Input[start..end]);
+            if (end != -1)
+            {
+                state.Cursor = end;
+                return new StringToken(state.Input[start..end]);
+            }
         }
         return null;
     }

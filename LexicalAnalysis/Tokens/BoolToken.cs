@@ -1,5 +1,5 @@
 ﻿
-namespace BTEJA_BCSH2_semestralka.Tokens;
+namespace BTEJA_BCSH2_semestralka.LexicalAnalysis.Tokens;
 
 internal class BoolToken : Token
 {

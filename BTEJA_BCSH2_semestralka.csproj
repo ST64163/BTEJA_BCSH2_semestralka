@@ -14,8 +14,4 @@
     <Page Remove="Interpreter\**" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="SemanticAnalysis\" />
-  </ItemGroup>
-
 </Project>
