@@ -1,12 +1,14 @@
-program	=	statement
+program		=	statements
 ;
-statement	=	{ variableDeclaration ';'
-			| functionDeclaration
-			| if | for | do | while 
-			| block | return 
-			| 'break' ';' | 'continue' ';'
-			| variableAssignment ';'
-			| functionInvocation ';'}
+statements	=	{statement}
+;
+statement	=	variableDeclaration ';'
+			|	functionDeclaration
+			|	if | for | do | while 
+			|	block | return 
+			|	'break' ';' | 'continue' ';'
+			|	variableAssignment ';'
+			|	functionInvocation ';'
 ;
 
 variableDeclaration	=	'var' identifier ':' identifier ['=' expression]
@@ -21,7 +23,7 @@ paramsDeclaration	=	[identifier ':' identifier {',' identifier ':' identifier}]
 ;
 return		=	'return' expression ';'
 ;
-block		=	'{' {statement} '}'
+block		=	'{' statements '}'
 ;
 
 if		=	'if' '(' expression ')' statement {'else' 'if' '(' expression ')' statement} ['else' statement]

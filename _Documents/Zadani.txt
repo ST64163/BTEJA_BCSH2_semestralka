@@ -1,0 +1,5 @@
+varianta: (c), téma: Interpret (podmnožiny) Kotlinu 
+▪ aplikace umožňuje vytvářet, načítat, ukládat a interpretovat zdrojové kódy
+▪ aplikace umožňuje zobrazit textový výstup z interpretu
+▪ kompilace a interpretace zadaného zdrojového kódu probíhá asynchronně
+▪ možné rozšíření: aplikace umožňuje procházet jednoduché grafické bludiště
