@@ -133,6 +133,7 @@ internal class Parser
         identifier = RequireIdentifierToken(state);
         RequireToken(TokenType.LeftParenth, state);
         parameters = ReadParamsDeclare(state);
+        RequireToken(TokenType.RightParenth, state);
         RequireToken(TokenType.Colon, state);
         datatype = RequireDatatypeToken(state);
         block = ReadBlock(state);
@@ -267,7 +268,7 @@ internal class Parser
      */
     private BlockStatement ReadBlock(ParserState state)
     {
-        List<Statement> statements = new();
+        List<Statement> statements;
 
         RequireToken(TokenType.LeftBracket, state);
         statements = ReadStatements(state);
@@ -443,7 +444,7 @@ internal class Parser
 
         return left;
     }
-
+     
     /**
      * Grammar: sixthLevel {'%' sixthLevel}
      */
@@ -453,7 +454,10 @@ internal class Parser
 
         expression = ReadLevel6(state);
         while (IsTokenType(state, TokenType.Modulo))
+        {
+            RequireToken(TokenType.Modulo, state);
             expression = new ModuloExpression(expression, ReadLevel6(state));
+        }
 
         return expression;
     }
@@ -511,7 +515,24 @@ internal class Parser
 
     // SUPPORT FUNCTIONS
 
-    private Expression? GetExpression(ParserState state) => throw new NotImplementedException();
+    private Expression? GetExpression(ParserState state)
+    {
+        Expression? expression;
+        List<Token> originalTokens = state.Tokens;
+        List<Token> tokensCopy = new();
+        state.Tokens.ForEach(token => tokensCopy.Add(token));
+        try 
+        {
+            state.Tokens = tokensCopy;
+            expression = ReadExpression(state);
+        }
+        catch(Exception _) 
+        {
+            state.Tokens = originalTokens; 
+            return null;
+        }
+        return expression;
+    }
 
     private Statement RequireStatement(ParserState state)
     {
@@ -543,8 +564,9 @@ internal class Parser
 
     private void RequireToken(TokenType type, ParserState state)
     {
-        if (!IsTokenType(state, TokenType.identifier))
+        if (!IsTokenType(state, type))
             throw new ParsingException($"Expected: {Token.TokenTypeToString[type]}");
+        ReadToken(state);
     }
 
     private string RequireIdentifierToken(ParserState state)
@@ -579,7 +601,7 @@ internal class Parser
 
     private class ParserState
     {
-        internal List<Token> Tokens { get; }
+        internal List<Token> Tokens { get; set; }
         internal ParserState(List<Token> tokens) => Tokens = tokens;
     }
 }

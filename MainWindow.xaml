@@ -5,8 +5,62 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BTEJA_BCSH2_semestralka"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="SubKotlin IDE" 
+        Height="450" Width="800">
     <Grid>
-        
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <Label Grid.Row="0" Grid.Column="0">Code Editor</Label>
+        <TextBox x:Name="textBox_editor" Grid.Row="1" Grid.Column="0"/>
+
+        <StackPanel x:Name="stackPanel_centralButtons" Grid.Row="1" Grid.Column="1">
+            <Button Click="ClickInterpret">Interpret</Button>
+            <Button Click="ClickLoad">Load</Button>
+            <Button Click="ClickSave">Save</Button>
+        </StackPanel>
+
+        <Label Grid.Row="0" Grid.Column="2">Console</Label>
+        <TextBox x:Name="textBox_console" Grid.Row="1" Grid.Column="2" Background="#FF595959" Foreground="AntiqueWhite"/>
     </Grid>
+
+    <Window.Resources>
+        <Style TargetType="Grid">
+            <Setter Property="Background" Value="#FF2A2B2B"/>
+        </Style>
+        <Style TargetType="Label">
+            <Setter Property="VerticalAlignment" Value="Center"></Setter>
+            <Setter Property="HorizontalAlignment" Value="Center"></Setter>
+            <Setter Property="Foreground" Value="White"></Setter>
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="FontSize" Value="16" />
+        </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="AcceptsReturn" Value="True" />
+            <Setter Property="AcceptsTab" Value="True" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="Background" Value="White"></Setter>
+            <Setter Property="Cursor" Value="IBeam"></Setter>
+            <Setter Property="Margin" Value="10,0,10,10" />
+        </Style>
+        <Style TargetType="StackPanel">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Center"></Setter>
+            <Setter Property="Margin" Value="5,0,5,0" />
+        </Style>
+        <Style TargetType="Button">
+            <Setter Property="Background" Value="White" />
+            <Setter Property="Margin" Value="0,5,0,5" />
+            <Setter Property="Padding" Value="5" />
+            <Setter Property="FontWeight" Value="DemiBold" />
+        </Style>
+    </Window.Resources>
 </Window>

@@ -47,6 +47,7 @@ abstract internal class Token
         {TokenType.Minus, "-"},
         {TokenType.Multiply, "*"},
         {TokenType.Divide, "/"},
+        {TokenType.Not, "!"},
         {TokenType.Modulo, "%"},
         {TokenType.identifier, "<identifier>"},
         {TokenType.dataInt, "<int>" },

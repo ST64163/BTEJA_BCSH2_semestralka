@@ -94,10 +94,10 @@ internal class Lexer
                 token = new BoolToken(true);
             else if (currentWord == "false")
                 token = new BoolToken(false);
-            else if (double.TryParse(currentWord, NumberStyles.Any, CultureInfo.InvariantCulture, out var real))
-                token = new DoubleToken(real);
             else if (int.TryParse(currentWord, NumberStyles.Any, CultureInfo.InvariantCulture, out int whole))
                 token = new IntToken(whole);
+            else if (double.TryParse(currentWord, NumberStyles.Any, CultureInfo.InvariantCulture, out var real))
+                token = new DoubleToken(real);
             else
                 token = new IdentifierToken(currentWord);
         }
