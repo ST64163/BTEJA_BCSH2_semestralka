@@ -1,10 +1,6 @@
 ﻿namespace InterpreterSK.AST.Expressions.Level6;
 
-internal class BoolExpression : Expression
+internal class BoolExpression : LiteralExpression
 {
-    internal bool Value { get; }
-
-    public BoolExpression(bool value) => Value = value;
-
-    internal override object Evaluate() => Value;
+    public BoolExpression(bool value) : base(value) { }
 }

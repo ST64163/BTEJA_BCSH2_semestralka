@@ -14,6 +14,16 @@ namespace BTEJA_BCSH2_semestralka
             InitializeComponent();
         }
 
+        private void ClickDebug(object sender, RoutedEventArgs e)
+        {
+            PrintLine("");
+            string sourceCode = textBox_editor.Text;
+            Interpreter interpreter = new();
+            void WriteCallback(object sender, string message) => PrintLine(message);
+            interpreter.WriteEvent += WriteCallback;
+            interpreter.Debug(sourceCode);
+        }
+
         private void ClickInterpret(object sender, RoutedEventArgs e)
         {
             PrintLine("");

@@ -1,6 +1,6 @@
 ﻿namespace InterpreterSK;
 
-using InterpreterSK.AST.Statements;
+using InterpreterSK.AST.Statements.Block;
 using InterpreterSK.LexicalAnalysis;
 using InterpreterSK.SemanticAnalysis;
 using InterpreterSK.Tokens;
@@ -13,6 +13,9 @@ public class Interpreter
     private readonly Lexer lexer;
     private readonly Parser parser;
 
+    private string? sourceCode;
+    private BlockStatement? builtProgram;
+
     public event WriteHandler? WriteEvent;
     public event ReadHandler? ReadEvent;
 
@@ -24,8 +27,33 @@ public class Interpreter
 
     public void Interpret(string code)
     {
+        if (code == string.Empty)
+            return;
+        if (sourceCode != null && sourceCode == code && builtProgram != null)
+        {
+            Execute(builtProgram);
+        }
+        else
+        {
+            builtProgram = Build(code);
+            if (builtProgram != null) 
+                Execute(builtProgram);
+        }
+    }
+
+    public void Debug(string code)
+    {
+        if (code == string.Empty)
+            return;
+        if (sourceCode == null || sourceCode != code || builtProgram == null)
+            builtProgram = Build(code);
+    }
+
+    private BlockStatement? Build(string code)
+    {
         try
         {
+            sourceCode = code;
             lexer.LoadProgram(code, out List<Token> tokens);
             /*
                 tokens.ForEach(token =>
@@ -40,13 +68,22 @@ public class Interpreter
                     });
                 */
             Write("Lexer: OK");
-            parser.Parse(tokens, out List<Statement> statements);
+            parser.Parse(tokens, out BlockStatement program);
             Write("Parser: OK");
+            //program.Analyze(context);
+            return program;
         }
         catch (Exception e)
         {
+            sourceCode = null;
             Write(e.Message);
+            return null;
         }
+    }
+
+    private void Execute(BlockStatement program)
+    {
+        //program.Execute(context);
     }
 
     internal string Read()

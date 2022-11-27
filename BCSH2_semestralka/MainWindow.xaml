@@ -23,7 +23,7 @@
         <TextBox x:Name="textBox_editor" Grid.Row="1" Grid.Column="0"/>
 
         <StackPanel x:Name="stackPanel_centralButtons" Grid.Row="1" Grid.Column="1">
-            <Button Click="ClickInterpret">Parse</Button>
+            <Button Click="ClickDebug">Debug</Button>
             <Button Click="ClickInterpret" Margin="0,5,0,25">Interpret</Button>
             <Button Click="ClickLoad">Load</Button>
             <Button Click="ClickSave">Save</Button>

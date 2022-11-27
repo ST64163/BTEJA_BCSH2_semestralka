@@ -1,13 +1,21 @@
-﻿using InterpreterSK.AST.Expressions;
-using InterpreterSK.AST.Expressions.Level0;
-using InterpreterSK.AST.Expressions.Level1;
-using InterpreterSK.AST.Expressions.Level2;
-using InterpreterSK.AST.Expressions.Level3;
-using InterpreterSK.AST.Expressions.Level4;
-using InterpreterSK.AST.Expressions.Level5;
-using InterpreterSK.AST.Expressions.Level6;
-using InterpreterSK.AST.Statements;
+﻿using InterpreterSK.AST.Statements;
+using InterpreterSK.AST.Statements.Block;
+using InterpreterSK.AST.Statements.FlowControl;
+using InterpreterSK.AST.Statements.Functions;
+using InterpreterSK.AST.Statements.Loops;
+using InterpreterSK.AST.Statements.Variables;
+using InterpreterSK.Exceptions;
 using InterpreterSK.Tokens;
+using InvalidOperationException = InterpreterSK.Exceptions.InvalidOperationException;
+using System.Text.RegularExpressions;
+using InterpreterSK.AST.Statements.Jumps;
+using InterpreterSK.AST.Expressions;
+using InterpreterSK.AST.Expressions.Level1;
+using InterpreterSK.AST.Expressions.Level6;
+using InterpreterSK.AST.Expressions.Level5;
+using InterpreterSK.AST.Expressions.Level4;
+using InterpreterSK.AST.Expressions.Level3;
+using InterpreterSK.AST.Expressions.Level2;
 
 namespace InterpreterSK.SemanticAnalysis;
 
@@ -17,10 +25,10 @@ internal class Parser
     /**
      * Grammar: statements
      */
-    internal void Parse(List<Token> tokens, out List<Statement> statements)
+    internal void Parse(List<Token> tokens, out BlockStatement program)
     {
         ParserState state = new(tokens);
-        statements = ReadStatements(state);
+        program = new(ReadStatements(state));
     }
 
     /**
@@ -79,13 +87,13 @@ internal class Parser
                     statement = ReadReturn(state);
                     break;
 
-                case TokenType.BREAK: // TODO: check if not in function
+                case TokenType.BREAK: // TODO: check if not in function -> Analyze
                     RequireToken(TokenType.BREAK, state);
                     RequireToken(TokenType.Semicolon, state);
                     statement = new BreakStatement();
                     break;
 
-                case TokenType.CONTINUE: // TODO: check if not in function
+                case TokenType.CONTINUE: // TODO: check if not in function -> Analyze
                     RequireToken(TokenType.CONTINUE, state);
                     RequireToken(TokenType.Semicolon, state);
                     statement = new ContinueStatement();
@@ -118,7 +126,7 @@ internal class Parser
         {
             RequireToken(TokenType.Assign, state);
             expression = ReadExpression(state);
-            // TODO: check expression.datatype == datatype
+            // TODO: check expression.datatype == datatype -> Analyze
         }
         return new VarDeclareStatement(identifier, datatype, expression);
     }
@@ -129,7 +137,7 @@ internal class Parser
     private FunDeclareStatement ReadFunDeclare(ParserState state)
     {
         string identifier;
-        List<ParamExpression> parameters;
+        List<ParamDeclaration> parameters;
         Type datatype;
         BlockStatement block;
 
@@ -148,9 +156,9 @@ internal class Parser
     /**
      * Grammar: [identifier ':' identifier {',' identifier ':' identifier}]
      */
-    private List<ParamExpression> ReadParamsDeclare(ParserState state)
+    private List<ParamDeclaration> ReadParamsDeclare(ParserState state)
     {
-        List<ParamExpression> parameters = new();
+        List<ParamDeclaration> parameters = new();
         string identifier;
         Type datatype;
 
@@ -159,7 +167,7 @@ internal class Parser
             identifier = RequireIdentifierToken(state);
             RequireToken(TokenType.Colon, state);
             datatype = RequireDatatypeToken(state);
-            parameters.Add(new ParamExpression(identifier, datatype));
+            parameters.Add(new ParamDeclaration(identifier, datatype));
         }
 
         if (IsTokenType(state, TokenType.identifier))
@@ -186,7 +194,7 @@ internal class Parser
         {
             RequireToken(TokenType.IF, state);
             RequireToken(TokenType.LeftParenth, state);
-            condition = ReadExpression(state); // TODO: check if result (is/will be) bool
+            condition = ReadExpression(state); // TODO: check if result (is/will be) bool -> Analyze
             RequireToken(TokenType.RightParenth, state);
             statement = RequireStatement(state);
             return (condition, statement);
@@ -216,15 +224,15 @@ internal class Parser
     {
         string identifier;
         Expression start, end;
-        Statement statement;
+        AST.Statements.Statement statement;
 
         RequireToken(TokenType.FOR, state);
         RequireToken(TokenType.LeftParenth, state);
         identifier = RequireIdentifierToken(state);
         RequireToken(TokenType.IN, state);
-        start = ReadExpression(state); // TODO: check if (whole?) number
+        start = ReadExpression(state); // TODO: check if (whole?) number -> Analyze
         RequireToken(TokenType.UNTIL, state);
-        end = ReadExpression(state); // TODO: check if (whole?) number
+        end = ReadExpression(state); // TODO: check if (whole?) number -> Analyze
         RequireToken(TokenType.RightParenth, state);
         statement = RequireStatement(state);
 
@@ -237,11 +245,11 @@ internal class Parser
     private WhileStatement ReadWhile(ParserState state)
     {
         Expression condition;
-        Statement statement;
+        AST.Statements.Statement statement;
 
         RequireToken(TokenType.WHILE, state);
         RequireToken(TokenType.LeftParenth, state);
-        condition = ReadExpression(state); // TODO: check if (is/will be) bool
+        condition = ReadExpression(state); // TODO: check if (is/will be) bool -> Analyze
         RequireToken(TokenType.RightParenth, state);
         statement = RequireStatement(state);
 
@@ -260,7 +268,7 @@ internal class Parser
         block = ReadBlock(state);
         RequireToken(TokenType.WHILE, state);
         RequireToken(TokenType.LeftParenth, state);
-        condition = ReadExpression(state); // TODO: check if (is/will be) bool
+        condition = ReadExpression(state); // TODO: check if (is/will be) bool -> Analyze
         RequireToken(TokenType.RightParenth, state);
         RequireToken(TokenType.Semicolon, state);
 
@@ -272,7 +280,7 @@ internal class Parser
      */
     private BlockStatement ReadBlock(ParserState state)
     {
-        List<Statement> statements;
+        List<AST.Statements.Statement> statements;
 
         RequireToken(TokenType.LeftBracket, state);
         statements = ReadStatements(state);
@@ -298,16 +306,16 @@ internal class Parser
     /**
      * Grammar: identifier '=' expression | identifier partialFunctionIvocation
      */
-    private Statement ReadVarAssignOrFunInvoke(ParserState state)
+    private AST.Statements.Statement ReadVarAssignOrFunInvoke(ParserState state)
     {
         string identifier;
         Expression? expression;
-        Statement statement;
+        AST.Statements.Statement statement;
 
         VarAssignStatement ReadPartialVarAssign()
         {
             RequireToken(TokenType.Assign, state);
-            expression = ReadExpression(state); // TODO: check if datatype is valid
+            expression = ReadExpression(state); // TODO: check if datatype is valid -> Analyze
             return new VarAssignStatement(identifier, expression);
         }
 
@@ -317,7 +325,7 @@ internal class Parser
         else if (IsTokenType(state, TokenType.LeftParenth))
             statement = ReadPartialFunInvoke(state, identifier, out _);
         else
-            throw new ParsingException("Expected = or (");
+            throw new InvalidSyntaxException("Expected = or (");
 
         return statement;
     }
@@ -360,8 +368,8 @@ internal class Parser
             TokenType type = ReadToken(state).TokenType;
             right = ReadLevel2(state);
             left = type == TokenType.Or
-                ? new OrExpression(left, right)
-                : new AndExpression(left, right);
+                ? new OrCondition(left, right)
+                : new AndCondition(left, right);
         }
 
         return left;
@@ -383,13 +391,13 @@ internal class Parser
             right = ReadLevel3(state);
             left = type switch
             {
-                TokenType.Equals => new EqualsExpression(left, right),
-                TokenType.NotEquals => new NotEqualsExpression(left, right),
-                TokenType.LessEquals => new LessEqualsExpression(left, right),
-                TokenType.GreaterEquals => new GreaterEqualsExpression(left, right),
-                TokenType.LessThan => new LessThanExpression(left, right),
-                TokenType.GreaterThan => new GreaterThanExpression(left, right),
-                _ => throw new ParsingException("Unexpected error"),
+                TokenType.Equals => new EqualsCondition(left, right),
+                TokenType.NotEquals => new NotEqualsCondition(left, right),
+                TokenType.LessEquals => new LessEqualsCondition(left, right),
+                TokenType.GreaterEquals => new GreaterEqualsCondition(left, right),
+                TokenType.LessThan => new LessThanCondition(left, right),
+                TokenType.GreaterThan => new GreaterThanCondition(left, right),
+                _ => throw new InvalidOperationException("Unexpected error"),
             };
         }
 
@@ -414,7 +422,7 @@ internal class Parser
             else if (unaryOperator == TokenType.Minus)
                 left = new MinusUnaryExpression(left);
             else
-                left = new NotExpression(left);
+                left = new NotCondition(left);
 
         while (IsTokenType(state, TokenType.Plus, TokenType.Minus))
         {
@@ -475,7 +483,7 @@ internal class Parser
 
         Token? token = PeekToken(state);
         if (token == null)
-            throw new ParsingException("Expected <function>, <value>, <identifier> or ( <expression> )");
+            throw new InvalidSyntaxException("Expected <function>, <value>, <identifier> or ( <expression> )");
         switch (token.TokenType)
         {
             case TokenType.identifier:
@@ -511,7 +519,7 @@ internal class Parser
                 RequireToken(TokenType.RightParenth, state);
                 break;
             default:
-                throw new ParsingException("Expected <function>, <value>, <identifier> or ( <expression> )");
+                throw new InvalidSyntaxException("Expected <function>, <value>, <identifier> or ( <expression> )");
         }
 
         return expression;
@@ -538,11 +546,11 @@ internal class Parser
         return expression;
     }
 
-    private Statement RequireStatement(ParserState state)
+    private AST.Statements.Statement RequireStatement(ParserState state)
     {
-        Statement? statement = ReadStatement(state);
+        AST.Statements.Statement? statement = ReadStatement(state);
         if (statement == null)
-            throw new ParsingException("Expected <statement>");
+            throw new InvalidSyntaxException("Expected <statement>");
         return statement;
     }
 
@@ -554,7 +562,7 @@ internal class Parser
             "Double" => typeof(double),
             "String" => typeof(string),
             "Boolean" => typeof(bool),
-            _ => throw new ParsingException("Ivalid datatype"),
+            _ => throw new InvalidDatatypeException("Unknown datatype"),
         };
     }
 
@@ -562,23 +570,25 @@ internal class Parser
     {
         object value;
         if (PeekToken(state) == null || (value = ReadToken(state).Value) == null)
-            throw new ParsingException("Expected <value>");
+            throw new InvalidSyntaxException("Expected <value>");
         return value;
     }
 
     private void RequireToken(TokenType type, ParserState state)
     {
         if (!IsTokenType(state, type))
-            throw new ParsingException($"Expected: {Token.TokenTypeToString[type]}");
+            throw new InvalidSyntaxException($"Expected: {Token.TokenTypeToString[type]}");
         ReadToken(state);
     }
 
     private string RequireIdentifierToken(ParserState state)
     {
         if (!IsTokenType(state, TokenType.identifier))
-            throw new ParsingException("Expected: <identifier>");
-        // TODO: check identifier regex
-        return (string)ReadToken(state).Value;
+            throw new InvalidSyntaxException("Expected: <identifier>");
+        string? identifier = (string?)ReadToken(state).Value;
+        if (identifier == null || !Regex.Match(identifier, "[a-zA-Z_][a-zA-Z0-9_]").Success)
+            throw new InvalidSyntaxException("Invalid identifier");
+        return identifier;
     }
 
     private bool IsTokenType(ParserState state, params TokenType[] types)

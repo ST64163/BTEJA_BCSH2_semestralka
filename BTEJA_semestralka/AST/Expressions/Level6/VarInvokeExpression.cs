@@ -1,10 +1,23 @@
-﻿namespace InterpreterSK.AST.Expressions.Level6;
+﻿using InterpreterSK.Execution.Elements;
+using ExecutionContext = InterpreterSK.Execution.ExecutionContext;
 
-internal class VarInvokeExpression : Expression
+namespace InterpreterSK.AST.Expressions.Level6;
+
+internal class VarInvokeExpression : InvokeExpression
 {
-    internal string Identifier { get; }
+    public VarInvokeExpression(string identifier) : base(identifier) {}
 
-    public VarInvokeExpression(string identifier) => Identifier = identifier;
+    protected override Type Analyzation(ExecutionContext context)
+        => FindVariable(context).Datatype;
 
-    internal override object Evaluate() => throw new InvalidOperationException();
+    internal override object Execute(ExecutionContext context)
+    {
+        Variable variable = FindVariable(context);
+        if (variable.Expression == null)
+            throw new Exceptions.InvalidInvocationException($"Variable {Identifier} not declared");
+        return variable.Expression.Execute(context);
+    }
+
+    private Variable FindVariable(ExecutionContext context)
+        => context.VariableContext.GetVariable(Identifier);
 }

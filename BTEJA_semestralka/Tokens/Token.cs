@@ -5,11 +5,13 @@ abstract internal class Token
 {
     internal TokenType TokenType { get; }
     internal object? Value { get; }
+    internal int RowNumber { get; }
 
-    internal Token(TokenType type, object? value)
+    internal Token(TokenType type, object? value, int rowNumber)
     {
         TokenType = type;
         Value = value;
+        RowNumber = rowNumber;
     }
 
     internal static Dictionary<TokenType, string> TokenTypeToString = new()

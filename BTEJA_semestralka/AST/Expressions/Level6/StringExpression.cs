@@ -1,10 +1,6 @@
 ﻿namespace InterpreterSK.AST.Expressions.Level6;
 
-internal class StringExpression : Expression
+internal class StringExpression : LiteralExpression
 {
-    internal string Value { get; }
-
-    public StringExpression(string value) => Value = value;
-
-    internal override object Evaluate() => Value;
+    public StringExpression(string value) : base(value) { }
 }
