@@ -14,10 +14,10 @@ internal class VarInvokeExpression : InvokeExpression
     {
         Variable variable = FindVariable(context);
         if (variable.Expression == null)
-            throw new Exceptions.InvalidInvocationException($"Variable {Identifier} not declared");
+            throw new Exceptions.InvalidInvocationException($"Variable {Identifier} not declared", RowNumber);
         return variable.Expression.Execute(context);
     }
 
     private Variable FindVariable(ExecutionContext context)
-        => context.VariableContext.GetVariable(Identifier);
+        => context.VariableContext.GetVariable(Identifier, RowNumber);
 }

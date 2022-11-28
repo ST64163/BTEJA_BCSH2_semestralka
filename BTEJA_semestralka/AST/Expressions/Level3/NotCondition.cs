@@ -7,7 +7,7 @@ internal class NotCondition : UnaryCondition
     protected override void CheckType(Type type)
     {
         if (type != typeof(bool))
-            throw new Exceptions.InvalidDatatypeException("Not condition is defined only for Boolean datatype");
+            throw new Exceptions.InvalidDatatypeException("Not condition is defined only for Boolean datatype", RowNumber);
     }
 
     protected override object Execution(Execution.ExecutionContext context, object value)

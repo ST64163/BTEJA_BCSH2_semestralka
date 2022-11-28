@@ -1,12 +1,10 @@
 ﻿using InterpreterSK.AST.Statements;
 using InterpreterSK.AST.Statements.Block;
-using InterpreterSK.AST.Statements.FlowControl;
 using InterpreterSK.AST.Statements.Functions;
 using InterpreterSK.AST.Statements.Loops;
 using InterpreterSK.AST.Statements.Variables;
 using InterpreterSK.Exceptions;
 using InterpreterSK.Tokens;
-using InvalidOperationException = InterpreterSK.Exceptions.InvalidOperationException;
 using System.Text.RegularExpressions;
 using InterpreterSK.AST.Statements.Jumps;
 using InterpreterSK.AST.Expressions;
@@ -16,6 +14,7 @@ using InterpreterSK.AST.Expressions.Level5;
 using InterpreterSK.AST.Expressions.Level4;
 using InterpreterSK.AST.Expressions.Level3;
 using InterpreterSK.AST.Expressions.Level2;
+using InterpreterSK.AST.Statements.Branching;
 
 namespace InterpreterSK.SemanticAnalysis;
 
@@ -28,7 +27,7 @@ internal class Parser
     internal void Parse(List<Token> tokens, out BlockStatement program)
     {
         ParserState state = new(tokens);
-        program = new(ReadStatements(state));
+        program = new(ReadStatements(state)) { RowNumber = 0 };
     }
 
     /**
@@ -38,22 +37,25 @@ internal class Parser
     {
         List<Statement> statements = new();
         Statement? statement;
+        int? firstRow = null;
         do
         {
-            statement = ReadStatement(state);
+            statement = ReadStatement(state, out int row);
+            if (firstRow == null)
+                firstRow = row;
             if (statement != null)
                 statements.Add(statement);
         } while (statement != null);
-
         return statements;
     }
 
     /**
      * variableDeclaration ';' | functionDeclaration | if | for | do | while | block | return | 'break' ';' | 'continue' ';' | variableAssignment ';' | functionInvocation ';'
      */
-    private Statement? ReadStatement(ParserState state)
+    private Statement? ReadStatement(ParserState state, out int rowNumber)
     {
         Statement? statement = null;
+        rowNumber = -1;
 
         Token? token = PeekToken(state);
         if (token != null)
@@ -61,47 +63,58 @@ internal class Parser
             switch (token.TokenType)
             {
                 case TokenType.VAR:
-                    statement = ReadVarDeclare(state);
+                    statement = ReadVarDeclare(state, out int rowVarDeclare);
+                    rowNumber = rowVarDeclare;
                     RequireToken(TokenType.Semicolon, state);
                     break;
 
                 case TokenType.FUN:
-                    statement = ReadFunDeclare(state);
+                    statement = ReadFunDeclare(state, out int rowFunDeclare);
+                    rowNumber = rowFunDeclare;
                     break;
                 case TokenType.IF:
-                    statement = ReadIf(state);
+                    statement = ReadIf(state, out int rowIf);
+                    rowNumber = rowIf;
                     break;
                 case TokenType.FOR:
-                    statement = ReadFor(state);
+                    statement = ReadFor(state, out int rowFor);
+                    rowNumber = rowFor;
                     break;
                 case TokenType.DO:
-                    statement = ReadDoWhile(state);
+                    statement = ReadDoWhile(state, out int rowDoWhile);
+                    rowNumber = rowDoWhile;
                     break;
                 case TokenType.WHILE:
-                    statement = ReadWhile(state);
+                    statement = ReadWhile(state, out int rowWhile);
+                    rowNumber = rowWhile;
                     break;
                 case TokenType.LeftBracket:
-                    statement = ReadBlock(state);
+                    statement = ReadBlock(state, out int rowBlock);
+                    rowNumber = rowBlock;
                     break;
                 case TokenType.RETURN:
-                    statement = ReadReturn(state);
+                    statement = ReadReturn(state, out int rowReturn);
+                    rowNumber = rowReturn;
                     break;
 
-                case TokenType.BREAK: // TODO: check if not in function -> Analyze
-                    RequireToken(TokenType.BREAK, state);
+                case TokenType.BREAK:
+                    RequireToken(TokenType.BREAK, state, out int rowBreak);
                     RequireToken(TokenType.Semicolon, state);
-                    statement = new BreakStatement();
+                    rowNumber = rowBreak;
+                    statement = new BreakStatement() { RowNumber = rowBreak };
                     break;
 
-                case TokenType.CONTINUE: // TODO: check if not in function -> Analyze
-                    RequireToken(TokenType.CONTINUE, state);
+                case TokenType.CONTINUE:
+                    RequireToken(TokenType.CONTINUE, state, out int rowContinue);
                     RequireToken(TokenType.Semicolon, state);
-                    statement = new ContinueStatement();
+                    rowNumber = rowContinue;
+                    statement = new ContinueStatement() { RowNumber = rowContinue };
                     break;
 
                 case TokenType.identifier:
-                    statement = ReadVarAssignOrFunInvoke(state);
+                    statement = ReadVarAssignOrFunInvoke(state, out int row);
                     RequireToken(TokenType.Semicolon, state);
+                    rowNumber = row;
                     break;
             }
         }
@@ -112,13 +125,14 @@ internal class Parser
     /**
      * Grammar: 'var' identifier ':' identifier ['=' expression]
      */
-    private VarDeclareStatement ReadVarDeclare(ParserState state)
+    private VarDeclareStatement ReadVarDeclare(ParserState state, out int rowNumber)
     {
         string identifier;
         Type datatype;
         Expression? expression = null;
 
-        RequireToken(TokenType.VAR, state);
+        RequireToken(TokenType.VAR, state, out int row);
+        rowNumber = row;
         identifier = RequireIdentifierToken(state);
         RequireToken(TokenType.Colon, state);
         datatype = RequireDatatypeToken(state);
@@ -126,31 +140,31 @@ internal class Parser
         {
             RequireToken(TokenType.Assign, state);
             expression = ReadExpression(state);
-            // TODO: check expression.datatype == datatype -> Analyze
         }
-        return new VarDeclareStatement(identifier, datatype, expression);
+        return new VarDeclareStatement(identifier, datatype, expression) {RowNumber = rowNumber};
     }
 
     /**
      * Grammar: 'fun' identifier '(' paramsDeclaration ')' ':' identifier block
      */
-    private FunDeclareStatement ReadFunDeclare(ParserState state)
+    private FunDeclareStatement ReadFunDeclare(ParserState state, out int rowNumber)
     {
         string identifier;
         List<ParamDeclaration> parameters;
         Type datatype;
         BlockStatement block;
 
-        RequireToken(TokenType.FUN, state);
+        RequireToken(TokenType.FUN, state, out int row);
+        rowNumber = row;
         identifier = RequireIdentifierToken(state);
         RequireToken(TokenType.LeftParenth, state);
         parameters = ReadParamsDeclare(state);
         RequireToken(TokenType.RightParenth, state);
         RequireToken(TokenType.Colon, state);
         datatype = RequireDatatypeToken(state);
-        block = ReadBlock(state);
+        block = ReadBlock(state, out int _);
 
-        return new FunDeclareStatement(identifier, parameters, datatype, block);
+        return new FunDeclareStatement(identifier, parameters, datatype, block) {RowNumber = rowNumber};
     }
 
     /**
@@ -164,14 +178,16 @@ internal class Parser
 
         void RequireParam()
         {
-            identifier = RequireIdentifierToken(state);
+            identifier = RequireIdentifierToken(state, out int row);
             RequireToken(TokenType.Colon, state);
             datatype = RequireDatatypeToken(state);
-            parameters.Add(new ParamDeclaration(identifier, datatype));
+            parameters.Add(new ParamDeclaration(identifier, datatype) {RowNumber = row});
         }
 
         if (IsTokenType(state, TokenType.identifier))
+        { 
             RequireParam();
+        }
         while (IsTokenType(state, TokenType.Comma))
         {
             RequireToken(TokenType.Comma, state);
@@ -184,28 +200,30 @@ internal class Parser
     /**
      * Grammar: 'if' '(' expression ')' statement {'else' 'if' '(' expression ')' statement} ['else' statement]
      */
-    private IfStatement ReadIf(ParserState state)
+    private IfStatement ReadIf(ParserState state, out int rowNumber)
     {
         List<(Expression?, Statement)> conditionments = new();
         Expression condition;
         Statement statement;
 
-        (Expression, Statement) ReadIfBlock()
+        (Expression, Statement) ReadIfBlock(out int rowIf)
         {
-            RequireToken(TokenType.IF, state);
+            RequireToken(TokenType.IF, state, out int row);
+            rowIf = row;
             RequireToken(TokenType.LeftParenth, state);
-            condition = ReadExpression(state); // TODO: check if result (is/will be) bool -> Analyze
+            condition = ReadExpression(state);
             RequireToken(TokenType.RightParenth, state);
             statement = RequireStatement(state);
             return (condition, statement);
         }
 
-        conditionments.Add(ReadIfBlock());
+        conditionments.Add(ReadIfBlock(out int row));
+        rowNumber = row;
         while (IsTokenType(state, TokenType.ELSE))
         {
             RequireToken(TokenType.ELSE, state);
             if (IsTokenType(state, TokenType.IF))
-                conditionments.Add(ReadIfBlock());
+                conditionments.Add(ReadIfBlock(out int _));
             else
             {
                 statement = RequireStatement(state);
@@ -214,118 +232,125 @@ internal class Parser
             }
         }
 
-        return new IfStatement(conditionments);
+        return new IfStatement(conditionments) {RowNumber = rowNumber};
     }
 
     /**
      * Grammar: 'for' '(' identifier 'in' expression 'until' expression  ')' statement
      */
-    private ForStatement ReadFor(ParserState state)
+    private ForStatement ReadFor(ParserState state, out int rowNumber)
     {
         string identifier;
         Expression start, end;
-        AST.Statements.Statement statement;
+        Statement statement;
 
-        RequireToken(TokenType.FOR, state);
+        RequireToken(TokenType.FOR, state, out int row);
+        rowNumber = row;
         RequireToken(TokenType.LeftParenth, state);
         identifier = RequireIdentifierToken(state);
         RequireToken(TokenType.IN, state);
-        start = ReadExpression(state); // TODO: check if (whole?) number -> Analyze
+        start = ReadExpression(state);
         RequireToken(TokenType.UNTIL, state);
-        end = ReadExpression(state); // TODO: check if (whole?) number -> Analyze
+        end = ReadExpression(state);
         RequireToken(TokenType.RightParenth, state);
         statement = RequireStatement(state);
 
-        return new ForStatement(identifier, start, end, statement);
+        return new ForStatement(identifier, start, end, statement) {RowNumber = rowNumber };
     }
 
     /**
      * Grammar: 'while' '(' expression ')' statement
      */
-    private WhileStatement ReadWhile(ParserState state)
+    private WhileStatement ReadWhile(ParserState state, out int rowNumber)
     {
         Expression condition;
-        AST.Statements.Statement statement;
+        Statement statement;
 
-        RequireToken(TokenType.WHILE, state);
+        RequireToken(TokenType.WHILE, state, out int row);
+        rowNumber = row;
         RequireToken(TokenType.LeftParenth, state);
-        condition = ReadExpression(state); // TODO: check if (is/will be) bool -> Analyze
+        condition = ReadExpression(state);
         RequireToken(TokenType.RightParenth, state);
         statement = RequireStatement(state);
 
-        return new WhileStatement(condition, statement);
+        return new WhileStatement(condition, statement) {RowNumber = rowNumber};
     }
 
     /**
      * Grammar: 'do' block 'while' '(' expression ')' ';'
      */
-    private DoWhileStatement ReadDoWhile(ParserState state)
+    private DoWhileStatement ReadDoWhile(ParserState state, out int rowNumber)
     {
         Expression condition;
         BlockStatement block;
 
-        RequireToken(TokenType.DO, state);
-        block = ReadBlock(state);
+        RequireToken(TokenType.DO, state, out int row);
+        rowNumber = row;
+        block = ReadBlock(state, out int _);
         RequireToken(TokenType.WHILE, state);
         RequireToken(TokenType.LeftParenth, state);
-        condition = ReadExpression(state); // TODO: check if (is/will be) bool -> Analyze
+        condition = ReadExpression(state);
         RequireToken(TokenType.RightParenth, state);
         RequireToken(TokenType.Semicolon, state);
 
-        return new DoWhileStatement(condition, block);
+        return new DoWhileStatement(condition, block) { RowNumber = rowNumber };
     }
 
     /**
      * Grammar: '{' statements '}'
      */
-    private BlockStatement ReadBlock(ParserState state)
+    private BlockStatement ReadBlock(ParserState state, out int rowNumber)
     {
-        List<AST.Statements.Statement> statements;
+        List<Statement> statements;
 
-        RequireToken(TokenType.LeftBracket, state);
+        RequireToken(TokenType.LeftBracket, state, out int row);
+        rowNumber = row;
         statements = ReadStatements(state);
         RequireToken(TokenType.RightBracket, state);
 
-        return new BlockStatement(statements);
+        return new BlockStatement(statements) {RowNumber = rowNumber};
     }
 
     /**
      * Grammar: 'return' expression ';'
      */
-    private ReturnStatement ReadReturn(ParserState state)
+    private ReturnStatement ReadReturn(ParserState state, out int rowNumber)
     {
         Expression expression;
 
-        RequireToken(TokenType.RETURN, state);
+        RequireToken(TokenType.RETURN, state, out int row);
+        rowNumber = row;
         expression = ReadExpression(state);
         RequireToken(TokenType.Semicolon, state);
 
-        return new ReturnStatement(expression);
+        return new ReturnStatement(expression) {RowNumber = rowNumber };
     }
 
     /**
      * Grammar: identifier '=' expression | identifier partialFunctionIvocation
      */
-    private AST.Statements.Statement ReadVarAssignOrFunInvoke(ParserState state)
+    private Statement ReadVarAssignOrFunInvoke(ParserState state, out int rowNumber)
     {
         string identifier;
         Expression? expression;
-        AST.Statements.Statement statement;
+        Statement statement;
+        rowNumber = -1;
 
-        VarAssignStatement ReadPartialVarAssign()
+        VarAssignStatement ReadPartialVarAssign(int rowVarAssign)
         {
             RequireToken(TokenType.Assign, state);
-            expression = ReadExpression(state); // TODO: check if datatype is valid -> Analyze
-            return new VarAssignStatement(identifier, expression);
+            expression = ReadExpression(state);
+            return new VarAssignStatement(identifier, expression) { RowNumber = rowVarAssign };
         }
 
-        identifier = RequireIdentifierToken(state);
+        identifier = RequireIdentifierToken(state, out int row);
+        rowNumber = row;
         if (IsTokenType(state, TokenType.Assign))
-            statement = ReadPartialVarAssign();
+            statement = ReadPartialVarAssign(rowNumber);
         else if (IsTokenType(state, TokenType.LeftParenth))
-            statement = ReadPartialFunInvoke(state, identifier, out _);
+            statement = ReadPartialFunInvoke(state, identifier, out FunInvokeExpression _, rowNumber);
         else
-            throw new InvalidSyntaxException("Expected = or (");
+            throw new InvalidSyntaxException("Expected = or (", row);
 
         return statement;
     }
@@ -333,7 +358,8 @@ internal class Parser
     /**
      * Grammar: '(' [expression {',' expression}] ')'
      */
-    private FunInvokeStatement ReadPartialFunInvoke(ParserState state, string identifier, out FunInvokeExpression functionExpression)
+    private FunInvokeStatement ReadPartialFunInvoke(ParserState state, string identifier, 
+        out FunInvokeExpression functionExpression, int rowNumber)
     {
         List<Expression> parameters = new();
         Expression? expression;
@@ -350,8 +376,8 @@ internal class Parser
         }
         RequireToken(TokenType.RightParenth, state);
 
-        functionExpression = new FunInvokeExpression(identifier, parameters);
-        return new FunInvokeStatement(identifier, parameters);
+        functionExpression = new FunInvokeExpression(identifier, parameters) {RowNumber = rowNumber};
+        return new FunInvokeStatement(identifier, parameters) {RowNumber = rowNumber};
     }
 
     /**
@@ -362,14 +388,15 @@ internal class Parser
         Expression left;
         Expression right;
 
-        left = ReadLevel2(state);
+        left = ReadLevel2(state, out int row);
         while (IsTokenType(state, TokenType.Or, TokenType.And))
         {
             TokenType type = ReadToken(state).TokenType;
-            right = ReadLevel2(state);
+            right = ReadLevel2(state, out int _);
             left = type == TokenType.Or
                 ? new OrCondition(left, right)
                 : new AndCondition(left, right);
+            left.RowNumber = row;
         }
 
         return left;
@@ -378,17 +405,18 @@ internal class Parser
     /**
      * Grammar: thirdLevel {('==' | '!=' | '<=' | '>=' | '<' | '>') thirdLevel}
      */
-    private Expression ReadLevel2(ParserState state)
+    private Expression ReadLevel2(ParserState state, out int rowNumber)
     {
         Expression left;
         Expression right;
 
-        left = ReadLevel3(state);
+        left = ReadLevel3(state, out int row);
+        rowNumber = row;
         while (IsTokenType(state, TokenType.Equals, TokenType.NotEquals,
             TokenType.LessEquals, TokenType.GreaterEquals, TokenType.LessThan, TokenType.GreaterThan))
         {
             TokenType type = ReadToken(state).TokenType;
-            right = ReadLevel3(state);
+            right = ReadLevel3(state, out int _);
             left = type switch
             {
                 TokenType.Equals => new EqualsCondition(left, right),
@@ -397,8 +425,9 @@ internal class Parser
                 TokenType.GreaterEquals => new GreaterEqualsCondition(left, right),
                 TokenType.LessThan => new LessThanCondition(left, right),
                 TokenType.GreaterThan => new GreaterThanCondition(left, right),
-                _ => throw new InvalidOperationException("Unexpected error"),
+                _ => throw new Exception("Unexpected behaviour"),
             };
+            left.RowNumber = rowNumber;
         }
 
         return left;
@@ -407,7 +436,7 @@ internal class Parser
     /**
      * Grammar: [('+' | '-' | '!')] fourthLevel {('+' | '-') fourthLevel}
      */
-    private Expression ReadLevel3(ParserState state)
+    private Expression ReadLevel3(ParserState state, out int rowNumber)
     {
         TokenType? unaryOperator = null;
         Expression left;
@@ -415,22 +444,27 @@ internal class Parser
 
         if (IsTokenType(state, TokenType.Plus, TokenType.Minus, TokenType.Not))
             unaryOperator = ReadToken(state).TokenType;
-        left = ReadLevel4(state);
+        left = ReadLevel4(state, out int row);
+        rowNumber = row;
         if (unaryOperator != null)
+        { 
             if (unaryOperator == TokenType.Plus)
                 left = new PlusUnaryExpression(left);
             else if (unaryOperator == TokenType.Minus)
                 left = new MinusUnaryExpression(left);
             else
                 left = new NotCondition(left);
+            left.RowNumber = rowNumber;
+        }
 
         while (IsTokenType(state, TokenType.Plus, TokenType.Minus))
         {
             TokenType type = ReadToken(state).TokenType;
-            right = ReadLevel3(state);
+            right = ReadLevel4(state, out int _);
             left = type == TokenType.Plus
                 ? new PlusExpression(left, right)
                 : new MinusExpression(left, right);
+            left.RowNumber = rowNumber;
         }
 
         return left;
@@ -439,19 +473,21 @@ internal class Parser
     /**
      * Grammar: fifthLevel {('*' | '/') fifthLevel}
      */
-    private Expression ReadLevel4(ParserState state)
+    private Expression ReadLevel4(ParserState state, out int rowNumber)
     {
         Expression left;
         Expression right;
 
-        left = ReadLevel5(state);
+        left = ReadLevel5(state, out int row);
+        rowNumber = row;
         while (IsTokenType(state, TokenType.Multiply, TokenType.Divide))
         {
             TokenType type = ReadToken(state).TokenType;
-            right = ReadLevel5(state);
+            right = ReadLevel5(state, out int _);
             left = type == TokenType.Multiply
                 ? new MultiplyExpression(left, right)
                 : new DivideExpression(left, right);
+            left.RowNumber = rowNumber;
         }
 
         return left;
@@ -460,15 +496,16 @@ internal class Parser
     /**
      * Grammar: sixthLevel {'%' sixthLevel}
      */
-    private Expression ReadLevel5(ParserState state)
+    private Expression ReadLevel5(ParserState state, out int rowNumber)
     {
         Expression expression;
 
-        expression = ReadLevel6(state);
+        expression = ReadLevel6(state, out int row);
+        rowNumber = row;
         while (IsTokenType(state, TokenType.Modulo))
         {
             RequireToken(TokenType.Modulo, state);
-            expression = new ModuloExpression(expression, ReadLevel6(state));
+            expression = new ModuloExpression(expression, ReadLevel6(state, out int _)) {RowNumber = rowNumber };
         }
 
         return expression;
@@ -477,49 +514,55 @@ internal class Parser
     /**
      * Grammar: functionInvocation | value | identifier | '(' expression ')'
      */
-    private Expression ReadLevel6(ParserState state)
+    private Expression ReadLevel6(ParserState state, out int rowNumber)
     {
         Expression expression;
 
-        Token? token = PeekToken(state);
+        Token? token = PeekToken(state, out int row);
         if (token == null)
-            throw new InvalidSyntaxException("Expected <function>, <value>, <identifier> or ( <expression> )");
+            throw new InvalidSyntaxException("Expected <function>, <value>, <identifier> or ( <expression> )", state.LastRow);
         switch (token.TokenType)
         {
             case TokenType.identifier:
-                string identifier = RequireIdentifierToken(state);
+                string identifier = RequireIdentifierToken(state, out int rowIdentifier);
+                rowNumber = rowIdentifier;
                 if (IsTokenType(state, TokenType.LeftParenth))
                 {
-                    ReadPartialFunInvoke(state, identifier, out FunInvokeExpression funInvoke);
+                    ReadPartialFunInvoke(state, identifier, out FunInvokeExpression funInvoke, rowIdentifier);
                     expression = funInvoke;
                 }
                 else
-                    expression = new VarInvokeExpression(identifier);
+                    expression = new VarInvokeExpression(identifier) {RowNumber = rowIdentifier};
                 break;
 
             case TokenType.dataBool:
-                bool boolean = (bool)RequireValueToken(state);
-                expression = new BoolExpression(boolean);
+                bool boolean = (bool)RequireValueToken(state, out int rowBool);
+                rowNumber = rowBool;
+                expression = new BoolExpression(boolean) {RowNumber = rowBool};
                 break;
             case TokenType.dataDouble:
-                double real = (double)RequireValueToken(state);
-                expression = new DoubleExpression(real);
+                double real = (double)RequireValueToken(state, out int rowDouble);
+                rowNumber = rowDouble;
+                expression = new DoubleExpression(real) {RowNumber = rowDouble};
                 break;
             case TokenType.dataInt:
-                int whole = (int)RequireValueToken(state);
-                expression = new IntExpression(whole);
+                int whole = (int)RequireValueToken(state, out int rowInt);
+                rowNumber = rowInt;
+                expression = new IntExpression(whole) {RowNumber = rowInt};
                 break;
             case TokenType.dataString:
-                string sentence = (string)RequireValueToken(state);
-                expression = new StringExpression(sentence);
+                string sentence = (string)RequireValueToken(state, out int rowString);
+                rowNumber = rowString;
+                expression = new StringExpression(sentence) {RowNumber = rowString};
                 break;
             case TokenType.LeftParenth:
-                RequireToken(TokenType.LeftParenth, state);
+                RequireToken(TokenType.LeftParenth, state, out int rowParenth);
+                rowNumber = rowParenth;
                 expression = ReadExpression(state);
                 RequireToken(TokenType.RightParenth, state);
                 break;
             default:
-                throw new InvalidSyntaxException("Expected <function>, <value>, <identifier> or ( <expression> )");
+                throw new InvalidSyntaxException("Expected <function>, <value>, <identifier> or ( <expression> )", row);
         }
 
         return expression;
@@ -538,7 +581,7 @@ internal class Parser
             state.Tokens = tokensCopy;
             expression = ReadExpression(state);
         }
-        catch (Exception _)
+        catch (Exception)
         {
             state.Tokens = originalTokens;
             return null;
@@ -546,48 +589,66 @@ internal class Parser
         return expression;
     }
 
-    private AST.Statements.Statement RequireStatement(ParserState state)
+    private Statement RequireStatement(ParserState state)
     {
-        AST.Statements.Statement? statement = ReadStatement(state);
+        Statement? statement = ReadStatement(state, out int row);
         if (statement == null)
-            throw new InvalidSyntaxException("Expected <statement>");
+            throw new InvalidSyntaxException("Expected <statement>", row);
         return statement;
     }
 
     private Type RequireDatatypeToken(ParserState state)
     {
-        return (string)RequireValueToken(state) switch
+        object value = RequireValueToken(state, out int row);
+        if (value.GetType() != typeof(string))
+            throw new InvalidSyntaxException("Expected <datatype>", row);
+        return value switch
         {
             "Int" => typeof(int),
             "Double" => typeof(double),
             "String" => typeof(string),
             "Boolean" => typeof(bool),
-            _ => throw new InvalidDatatypeException("Unknown datatype"),
+            _ => throw new InvalidDatatypeException("Unknown datatype", row),
         };
     }
 
-    private object RequireValueToken(ParserState state)
+    private object RequireValueToken(ParserState state, out int rowNumber)
     {
-        object value;
-        if (PeekToken(state) == null || (value = ReadToken(state).Value) == null)
-            throw new InvalidSyntaxException("Expected <value>");
+        object? value;
+        if (PeekToken(state) == null || (value = ReadToken(state, out int rowRead).Value) == null)
+            throw new InvalidSyntaxException("Expected <value>", state.LastRow);
+        rowNumber = rowRead;
         return value;
     }
 
     private void RequireToken(TokenType type, ParserState state)
+        => RequireToken(type, state, out int _);
+
+    private void RequireToken(TokenType type, ParserState state, out int rowNumber)
     {
         if (!IsTokenType(state, type))
-            throw new InvalidSyntaxException($"Expected: {Token.TokenTypeToString[type]}");
-        ReadToken(state);
+        {
+            PeekToken(state, out int rowPeek);
+            throw new InvalidSyntaxException($"Expected: {Token.TokenTypeToString[type]}", rowPeek);
+        }
+        ReadToken(state, out int row);
+        rowNumber = row;
     }
 
     private string RequireIdentifierToken(ParserState state)
+        => RequireIdentifierToken(state, out int _);
+
+    private string RequireIdentifierToken(ParserState state, out int rowNumber)
     {
         if (!IsTokenType(state, TokenType.identifier))
-            throw new InvalidSyntaxException("Expected: <identifier>");
-        string? identifier = (string?)ReadToken(state).Value;
-        if (identifier == null || !Regex.Match(identifier, "[a-zA-Z_][a-zA-Z0-9_]").Success)
-            throw new InvalidSyntaxException("Invalid identifier");
+        {
+            PeekToken(state, out int rowPeek);
+            throw new InvalidSyntaxException("Expected: <identifier>", rowPeek);
+        }
+        string? identifier = (string?)ReadToken(state, out int row).Value;
+        rowNumber = row;
+        if (identifier == null || !Regex.Match(identifier, "[a-zA-Z_][a-zA-Z0-9_]*").Success)
+            throw new InvalidSyntaxException("Invalid identifier", row);
         return identifier;
     }
 
@@ -602,12 +663,24 @@ internal class Parser
         return false;
     }
 
-    private Token? PeekToken(ParserState state) => state.Tokens.Count != 0 ? state.Tokens.First() : null;
+    private Token? PeekToken(ParserState state)
+        => PeekToken(state, out int _);
+
+    private Token? PeekToken(ParserState state, out int rowNumber)
+    { 
+        Token? token = state.Tokens.Count != 0 ? state.Tokens.First() : null;
+        rowNumber = token?.RowNumber ?? state.LastRow;
+        return token;
+    }
 
     private Token ReadToken(ParserState state)
+        => ReadToken(state, out int _);
+
+    private Token ReadToken(ParserState state, out int rowNumber)
     {
         Token token = state.Tokens.First();
         state.Tokens.RemoveAt(0);
+        rowNumber = token.RowNumber;
         return token;
     }
 
@@ -616,6 +689,12 @@ internal class Parser
     private class ParserState
     {
         internal List<Token> Tokens { get; set; }
-        internal ParserState(List<Token> tokens) => Tokens = tokens;
+        internal int LastRow { get; }
+        internal ParserState(List<Token> tokens)
+        {
+            Tokens = tokens;
+            LastRow = (tokens.Count > 0) 
+                ? tokens.Last().RowNumber : -1;
+        }
     }
 }

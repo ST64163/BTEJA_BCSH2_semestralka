@@ -1,7 +1,9 @@
 ﻿
+using InterpreterSK.Execution.Elements;
+
 namespace InterpreterSK.AST.Statements.Functions;
 
-internal class ParamDeclaration : Statement
+internal class ParamDeclaration : Node
 {
     internal string Identifier { get; }
     internal Type Datatype { get; }
@@ -12,13 +14,9 @@ internal class ParamDeclaration : Statement
         Datatype = datatype;
     }
 
-    protected override void Analyzation(Execution.ExecutionContext context)
-    {
-        throw new NotImplementedException();
-    }
-
     internal override object Execute(Execution.ExecutionContext context)
-    {
-        throw new NotImplementedException();
-    }
+        => new Variable(Identifier, Datatype, null);
+
+    internal override Type Analyze(Execution.ExecutionContext context)
+        => Datatype;
 }

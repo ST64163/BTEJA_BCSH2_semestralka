@@ -1,25 +1,23 @@
 ﻿using InterpreterSK.AST.Expressions;
+using InterpreterSK.Execution.Elements;
 
 namespace InterpreterSK.AST.Statements.Variables;
 
-internal class VarAssignStatement : Statement
+internal class VarAssignStatement : VarStatement
 {
-    internal string Identifier { get; }
     internal Expression Expression { get; }
 
-    public VarAssignStatement(string identifier, Expression expression)
+    public VarAssignStatement(string identifier, Expression expression) : base(identifier)
     {
-        Identifier = identifier;
         Expression = expression;
     }
 
-    internal override object Execute(Execution.ExecutionContext context)
+    protected override void Operation(Execution.ExecutionContext context) 
     {
-        throw new NotImplementedException();
-    }
-
-    protected override void Analyzation(Execution.ExecutionContext context)
-    {
-        throw new NotImplementedException();
+        Variable variable = context.VariableContext.GetVariable(Identifier, RowNumber);
+        Type type = Expression.Analyze(context.CreateInnerContext(context.BranchOwner));
+        if (variable.Datatype != type)
+            throw new Exceptions.InvalidDatatypeException("Cannot assign expression to variable of different datatype", RowNumber);
+        variable.Expression = Expression;
     }
 }

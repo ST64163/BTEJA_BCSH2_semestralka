@@ -1,5 +1,4 @@
 ﻿using InterpreterSK.Execution.Elements;
-using ExecutionContext = InterpreterSK.Execution.ExecutionContext;
 
 namespace InterpreterSK.AST.Expressions.Level6;
 
@@ -13,12 +12,15 @@ internal class FunInvokeExpression : InvokeExpression
         Parameters = parameters;
     }
 
-    internal override object Execute(ExecutionContext context)
-        => FindFunction(context).Execute(context);
+    internal override object Execute(Execution.ExecutionContext context)
+    {
+        Function function = context.FunctionContext.GetFunction(Identifier, RowNumber);
+        return function.Call(context, Parameters, RowNumber);
+    } 
 
-    protected override Type Analyzation(ExecutionContext context)
-        => FindFunction(context).Analyze(context);
-
-    private Function FindFunction(ExecutionContext context)
-        => context.FunctionContext.GetFunction(Identifier);
+    protected override Type Analyzation(Execution.ExecutionContext context)
+    {
+        Function function = context.FunctionContext.GetFunction(Identifier, RowNumber);
+        return function.Analyze(context, Parameters, RowNumber);
+    }
 }

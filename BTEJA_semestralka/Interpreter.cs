@@ -4,6 +4,7 @@ using InterpreterSK.AST.Statements.Block;
 using InterpreterSK.LexicalAnalysis;
 using InterpreterSK.SemanticAnalysis;
 using InterpreterSK.Tokens;
+using ExecutionContext = Execution.ExecutionContext;
 
 public delegate void WriteHandler(object sender, string message);
 public delegate string ReadHandler(object sender);
@@ -70,7 +71,11 @@ public class Interpreter
             Write("Lexer: OK");
             parser.Parse(tokens, out BlockStatement program);
             Write("Parser: OK");
-            //program.Analyze(context);
+            ExecutionContext globalContext = new(this);
+            program.Analyze(globalContext);
+            Write("Analysis: OK");
+
+            Write("Build complete");
             return program;
         }
         catch (Exception e)
@@ -83,7 +88,14 @@ public class Interpreter
 
     private void Execute(BlockStatement program)
     {
-        //program.Execute(context);
+        try
+        {
+            program.Execute(new(this));
+        }
+        catch (Exception e)
+        {
+            Write(e.Message);
+        }
     }
 
     internal string Read()

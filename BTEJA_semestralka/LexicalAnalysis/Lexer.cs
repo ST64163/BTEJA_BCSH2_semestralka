@@ -2,6 +2,7 @@
 using InterpreterSK.Tokens.StaticTokens;
 using InterpreterSK.Tokens.ValueTokens;
 using System.Globalization;
+using System.Text.RegularExpressions;
 
 namespace InterpreterSK.LexicalAnalysis;
 
@@ -23,9 +24,10 @@ internal class Lexer
         bool endOfWord = false;
         do
         {
+            if (state.Cursor >= state.Input.Length)
+                break;
             currentChar = state.Input[state.Cursor];
-            if (currentChar.ToString() == Environment.NewLine)
-                state.RowNumber++;
+            CheckNewLine(state, currentChar);
             if (char.IsWhiteSpace(currentChar) || char.IsControl(currentChar))
                 endOfWord = true;
             else if (!char.IsLetterOrDigit(currentChar))
@@ -54,6 +56,19 @@ internal class Lexer
 
         if (currentWord != "")
             state.Tokens.Add(GetToken(currentWord, state));
+    }
+
+    private void CheckNewLine(LexerState state, char currentChar)
+    {
+        string currChar = currentChar.ToString();
+        if (currChar == Environment.NewLine) 
+            state.RowNumber++;
+        else if (state.Cursor + 1 < state.Input.Length)
+        {
+            string nextChar = state.Input[state.Cursor + 1].ToString();
+            if (currChar + nextChar == Environment.NewLine)
+                state.RowNumber++;
+        }
     }
 
     private StringToken? GetStringToken(char currentChar, LexerState state)
@@ -97,10 +112,12 @@ internal class Lexer
                 token = new BoolToken(true, state.RowNumber);
             else if (currentWord == "false")
                 token = new BoolToken(false, state.RowNumber);
-            else if (int.TryParse(currentWord, NumberStyles.Any, CultureInfo.InvariantCulture, out int whole))
-                token = new IntToken(whole, state.RowNumber);
-            else if (double.TryParse(currentWord, NumberStyles.Any, CultureInfo.InvariantCulture, out var real))
+            else if (Regex.Match(currentWord, "[0-9]+[.][0-9]+").Success 
+                && double.TryParse(currentWord, NumberStyles.Any, CultureInfo.InvariantCulture, out var real))
                 token = new DoubleToken(real, state.RowNumber);
+            else if (Regex.Match(currentWord, "[0-9]+").Success 
+                && int.TryParse(currentWord, NumberStyles.Any, CultureInfo.InvariantCulture, out int whole))
+                token = new IntToken(whole, state.RowNumber);
             else
                 token = new IdentifierToken(currentWord, state.RowNumber);
         }
@@ -120,7 +137,7 @@ internal class Lexer
         internal string Input { get; }
         internal int Cursor { get; set; } = 0;
         internal List<Token> Tokens { get; } = new();
-        internal int RowNumber { get; set; } = 0;
+        internal int RowNumber { get; set; } = 1;
 
         internal LexerState(string input) => Input = input;
     }

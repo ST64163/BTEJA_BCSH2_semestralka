@@ -2,9 +2,9 @@
 
 namespace InterpreterSK.AST.Expressions;
 
-internal abstract class LiteralExpression : Expression
+internal class LiteralExpression : Expression
 {
-    internal object Value { get; }
+    internal object Value { get; set; }
 
     internal LiteralExpression(object value) 
     {

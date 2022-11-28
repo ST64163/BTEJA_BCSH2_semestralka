@@ -1,14 +1,13 @@
 ﻿namespace InterpreterSK.AST.Statements.Jumps;
 
-internal class BreakStatement : Statement
+internal class BreakStatement : JumpStatement
 {
-    protected override void Analyzation(Execution.ExecutionContext context)
+    protected override void Analyzation(Execution.ExecutionContext context) 
     {
-        throw new NotImplementedException();
+        if (context.BranchOwner is not LoopStatement)
+            throw new Exceptions.InvalidSyntaxException("Break statement can be located only in loop statement", RowNumber);
     }
 
     internal override object Execute(Execution.ExecutionContext context)
-    {
-        throw new NotImplementedException();
-    }
+        => this;
 }

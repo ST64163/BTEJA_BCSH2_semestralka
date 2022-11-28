@@ -1,5 +1,7 @@
 ﻿
+using InterpreterSK.AST.Expressions;
 using InterpreterSK.AST.Statements.Block;
+using InterpreterSK.AST.Statements.Jumps;
 
 namespace InterpreterSK.Execution.Elements;
 
@@ -7,21 +9,65 @@ internal class Function : ExecutionElement
 {
     internal BlockStatement Block { get; }
 
-    internal Function(string identifier, Type datatype, BlockStatement block) : base(identifier, datatype) 
+    internal List<Variable> Parameters { get; }
+
+    internal Function(string identifier, Type datatype, List<Variable> parameters, BlockStatement block) : base(identifier, datatype) 
     {
+        Parameters = parameters;
         Block = block;
     }
 
-
-    internal Type Analyze(ExecutionContext context)
+    internal object Call(ExecutionContext outerContext, List<Expression> parameters, int rowNumber)
     {
-        // TODO check if contains return (and valid datatype)
-        return typeof(Function);
+        ExecutionContext innerContext = outerContext.CreateInnerContext(this);
+        InsertParameters(innerContext, parameters, true, rowNumber);
+        object result = Block.Execute(innerContext);
+        if (result is ReturnStatement statement)
+            return statement.Value;
+        return result;
+        
     }
 
-    internal object Execute(ExecutionContext context)
+    internal Type Analyze(ExecutionContext outerContext, List<Expression> parameters, int rowNumber)
     {
-        // TODO
-        return Block.Execute(context);
+        ExecutionContext innerContext = outerContext.CreateInnerContext(this);
+        InsertParameters(innerContext, parameters, false, rowNumber);
+        Block.Analyze(innerContext);
+        return Datatype;
+    }
+
+    private void CheckParameters(List<Expression> expressions, int rowNumber)
+    {
+        if (expressions.Count != Parameters.Count)
+            throw new Exceptions.InvalidInvocationException(
+                $"Wrong number of parameters, expected: {Parameters.Count}, given: {expressions.Count}", rowNumber);
+    }
+
+    private void InsertParameters(ExecutionContext context, List<Expression> expressions, bool execute, int rowNumber)
+    {
+        CheckParameters(expressions, rowNumber);
+        Variable parameter;
+        Expression expression;
+        object value;
+        Type type;
+        for (int i = 0; i < Parameters.Count; i++)
+        {
+            parameter = Parameters[i];
+            expression = expressions[i];
+            if (execute)
+            {
+                value = expression.Execute(context);
+                type = value.GetType();
+                parameter.Expression = new LiteralExpression(value);
+            }
+            else
+            { 
+                type = expression.Analyze(context);
+                parameter.Expression = expression;
+            }
+            if (parameter.Datatype != type)
+                throw new Exceptions.InvalidDatatypeException("Cannot assign expression to parameter of different datatype", expression.RowNumber);
+            context.VariableContext.AddVariable(parameter);
+        }
     }
 }

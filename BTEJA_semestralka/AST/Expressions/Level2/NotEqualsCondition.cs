@@ -7,7 +7,7 @@ internal class NotEqualsCondition : BinaryCondition
     protected override void CheckTypes(Type leftType, Type rightType)
     {
         if (leftType != rightType)
-            throw new Exceptions.InvalidDatatypeException("Not equals to condition is not defined for two different datatypes");
+            throw new Exceptions.InvalidDatatypeException("Not equals to condition is not defined for two different datatypes", RowNumber);
     }
 
     protected override object Execution(Execution.ExecutionContext context, object leftValue, object rightValue)

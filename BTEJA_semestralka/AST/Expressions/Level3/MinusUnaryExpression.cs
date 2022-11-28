@@ -7,7 +7,7 @@ internal class MinusUnaryExpression : UnaryExpression
     protected override void CheckType(Type type)
     {
         if (type != typeof(int) && type != typeof(double))
-            throw new Exceptions.InvalidDatatypeException("Minus operation is defined only for Int and Double datatype");
+            throw new Exceptions.InvalidDatatypeException("Minus operation is defined only for Int and Double datatype", RowNumber);
     }
 
     protected override object Execution(Execution.ExecutionContext context, object value)

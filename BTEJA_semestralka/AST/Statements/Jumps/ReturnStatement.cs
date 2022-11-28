@@ -2,18 +2,26 @@
 
 namespace InterpreterSK.AST.Statements.Jumps;
 
-internal class ReturnStatement : Statement
+internal class ReturnStatement : JumpStatement
 {
-    internal Expression Expression;
+    internal Expression Expression { get; }
+
+    internal object Value { get; private set; }
 
     public ReturnStatement(Expression expression)
     {
         Expression = expression;
+        Value = expression;
     }
 
     protected override void Analyzation(Execution.ExecutionContext context)
-        => Expression.Analyze(context);
+    {
+        AnalyzedType = Expression.Analyze(context);   
+    }
 
     internal override object Execute(Execution.ExecutionContext context)
-        => Expression.Execute(context);
+    {
+        Value = Expression.Execute(context);
+        return this;
+    }
 }

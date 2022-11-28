@@ -8,9 +8,9 @@ internal class LessThanCondition : BinaryCondition
     protected override void CheckTypes(Type leftType, Type rightType)
     {
         if (leftType != rightType)
-            throw new Exceptions.InvalidDatatypeException("Less than condition is not defined for two different datatypes");
+            throw new Exceptions.InvalidDatatypeException("Less than condition is not defined for two different datatypes", RowNumber);
         if (leftType != typeof(int) && leftType != typeof(double))
-            throw new Exceptions.InvalidDatatypeException("Less than condition is defined only for Int and Double datatypes");
+            throw new Exceptions.InvalidDatatypeException("Less than condition is defined only for Int and Double datatypes", RowNumber);
     }
 
     protected override object Execution(Execution.ExecutionContext context, object leftValue, object rightValue)

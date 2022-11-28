@@ -1,7 +1,7 @@
 ﻿
 namespace InterpreterSK.Exceptions;
 
-internal class InvalidInvocationException : Exception
+internal class InvalidInvocationException : InterpreterException
 {
-    public InvalidInvocationException(string message) : base(message) { }
+    public InvalidInvocationException(string message, int rowNumber) : base("InvalidInvocationException", rowNumber, message) { }
 }

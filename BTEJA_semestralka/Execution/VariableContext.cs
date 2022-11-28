@@ -11,11 +11,23 @@ internal class VariableContext
         Variables = variables;
     }
 
-    internal Variable GetVariable(string identifier)
+    internal Variable GetVariable(string identifier, int rowNumber)
     {
         Variable? variable = Variables.Find(variable => variable.Identifier == identifier);
         if (variable == null)
-            throw new Exceptions.InvalidInvocationException($"Reading unknown variable: {identifier}");
+            throw new Exceptions.InvalidInvocationException($"Reading unknown variable: {identifier}", rowNumber);
         return variable;
+    }
+
+    internal void AddVariable(Variable variable)
+        => Variables.Add(variable);
+
+    internal VariableContext CreateCopy()
+    {
+        List<Variable> variables = new();
+        Variables.ForEach(variable => variables.Add(
+            new Variable(variable.Identifier, variable.Datatype, variable.Expression)
+            ));
+        return new VariableContext(variables);
     }
 }

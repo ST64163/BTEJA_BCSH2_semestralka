@@ -1,7 +1,7 @@
 ﻿
 namespace InterpreterSK.Exceptions;
 
-internal class InvalidSyntaxException : Exception
+internal class InvalidSyntaxException : InterpreterException
 {
-    public InvalidSyntaxException(string message) : base(message) { }
+    public InvalidSyntaxException(string message, int rowNumber) : base("InvalidSyntaxException", rowNumber, message) { }
 }

@@ -1,26 +1,47 @@
 ﻿using InterpreterSK.AST.Expressions;
+using InterpreterSK.AST.Statements.Jumps;
+using ExecutionContext = InterpreterSK.Execution.ExecutionContext;
 
 namespace InterpreterSK.AST.Statements.Loops;
 
-internal class WhileStatement : Statement
+internal class WhileStatement : LoopStatement
 {
     internal Expression Condition { get; }
-    internal Statement Statement { get; }
 
-    public WhileStatement(Expression condition, Statement statement)
+    public WhileStatement(Expression condition, Statement statement) : base(statement)
     {
         Condition = condition;
-        Statement = statement;
     }
 
-    internal override object Execute(Execution.ExecutionContext context)
+    internal override object Execute(ExecutionContext outerContext)
     {
-        throw new NotImplementedException();
+        ExecutionContext innerContext = outerContext.CreateInnerContext(this);
+        while (true)
+        {
+            object condition = Condition.Execute(innerContext);
+            CheckCondition(condition.GetType());
+            if (!(bool)condition)
+                break;
+            object result = Statement.Execute(innerContext);
+            if (result is ReturnStatement)
+                return result;
+            else if (result is BreakStatement)
+                break;
+        }
+        return this;
     }
 
-    protected override void Analyzation(Execution.ExecutionContext context)
+    protected override void Analyzation(ExecutionContext outerContext)
     {
-        Condition.Analyze(context);
-        Statement.Analyze(context);
+        ExecutionContext innerContext = outerContext.CreateInnerContext(this);
+        Type conditionType = Condition.Analyze(innerContext);
+        CheckCondition(conditionType);
+        Statement.Analyze(innerContext);
+    }
+
+    private void CheckCondition(Type conditionType)
+    { 
+        if (conditionType != typeof(bool))
+            throw new Exceptions.InvalidDatatypeException("Condition must be evaluated as Boolean", RowNumber);
     }
 }

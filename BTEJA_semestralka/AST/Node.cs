@@ -4,8 +4,8 @@ namespace InterpreterSK.AST;
 
 internal abstract class Node
 {
-    protected Type? AnalyzedType { get; set; }
-    internal int RowNumber { get; set; }
+    protected Type? AnalyzedType { get; set; } = null;
+    internal int RowNumber { get; set; } = -10;
 
     internal abstract Type Analyze(ExecutionContext context);
     internal abstract object Execute(ExecutionContext context);

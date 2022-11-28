@@ -1,4 +1,6 @@
-﻿namespace InterpreterSK.AST.Statements.Block;
+﻿using InterpreterSK.AST.Statements.Jumps;
+
+namespace InterpreterSK.AST.Statements.Block;
 
 internal class BlockStatement : Statement
 {
@@ -11,11 +13,17 @@ internal class BlockStatement : Statement
 
     internal override object Execute(Execution.ExecutionContext context)
     {
-        throw new NotImplementedException();
+        foreach (Statement statement in Statements)
+        { 
+            object result = statement.Execute(context);
+            if (result is ReturnStatement)
+                return result;
+        }
+        return this;
     }
 
     protected override void Analyzation(Execution.ExecutionContext context)
     {
-        throw new NotImplementedException();
+        Statements.ForEach(statement => statement.Analyze(context));
     }
 }
