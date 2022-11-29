@@ -29,7 +29,7 @@ internal class ForStatement : LoopStatement
         Variable? variable = innerContext.VariableContext.Variables.Find(variable => variable.Identifier == VariableIdentifier);
         if (variable == null)
         {
-            variable = new Variable(VariableIdentifier, typeof(int), Start);
+            variable = new Variable(VariableIdentifier, typeof(int), Start, innerContext);
             innerContext.VariableContext.AddVariable(variable);
         }
         else
@@ -53,7 +53,7 @@ internal class ForStatement : LoopStatement
         Variable? variable = innerContext.VariableContext.Variables.Find(variable => variable.Identifier == VariableIdentifier);
         if (variable == null)
         {
-            variable = new Variable(VariableIdentifier, typeof(int), new IntExpression(startValue));
+            variable = new Variable(VariableIdentifier, typeof(int), new IntExpression(startValue), innerContext);
             innerContext.VariableContext.AddVariable(variable);
         }
         else
@@ -64,6 +64,8 @@ internal class ForStatement : LoopStatement
 
         for (int i = startValue; i < endValue; i++)
         {
+            if (CurrentRepetition++ >= outerContext.RepetitionLimit)
+                throw new Exceptions.StackOverflowException("For loop reached limit of repeats", RowNumber);
             Expression expression = variable?.Expression 
                 ?? throw new Exception("Unexpected behaviour");
             ((IntExpression)expression).Value = i;

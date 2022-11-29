@@ -22,7 +22,7 @@ internal class FunctionContext
     internal void AddFunction(Function function) 
         => Functions.Add(function);
 
-    internal FunctionContext CreateCopy()
+    internal FunctionContext CreateCopy(ExecutionContext context)
     {
         List<Function> functions = new();
         Functions.ForEach(
@@ -30,9 +30,9 @@ internal class FunctionContext
                 List<Variable> parameters = new();
                 function.Parameters.ForEach(
                     parameter => parameters.Add(
-                        new Variable(parameter.Identifier, parameter.Datatype, parameter.Expression)));
+                        new Variable(parameter.Identifier, parameter.Datatype, parameter.Expression, function.Context ?? context)));
                 functions.Add(
-                    new Function(function.Identifier, function.Datatype, parameters, function.Block));
+                    new Function(function.Identifier, function.Datatype, parameters, function.Block, function.Context ?? context));
             });
         return new FunctionContext(functions);
     }

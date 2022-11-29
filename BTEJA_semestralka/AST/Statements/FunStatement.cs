@@ -9,4 +9,7 @@ internal abstract class FunStatement : Statement
     {
         Identifier = identifier;
     }
+
+    internal override bool EndsInReturn(Execution.ExecutionContext _, Type __)
+        => false;
 }

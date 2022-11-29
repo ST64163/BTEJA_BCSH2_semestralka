@@ -18,6 +18,8 @@ internal class WhileStatement : LoopStatement
         ExecutionContext innerContext = outerContext.CreateInnerContext(this);
         while (true)
         {
+            if (CurrentRepetition++ >= outerContext.RepetitionLimit)
+                throw new Exceptions.StackOverflowException("While loop reached limit of repeats", RowNumber);
             object condition = Condition.Execute(innerContext);
             CheckCondition(condition.GetType());
             if (!(bool)condition)

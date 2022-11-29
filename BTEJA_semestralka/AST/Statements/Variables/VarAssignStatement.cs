@@ -12,7 +12,7 @@ internal class VarAssignStatement : VarStatement
         Expression = expression;
     }
 
-    protected override void Operation(Execution.ExecutionContext context) 
+    protected override void Operation(Execution.ExecutionContext context, bool _) 
     {
         Variable variable = context.VariableContext.GetVariable(Identifier, RowNumber);
         Type type = Expression.Analyze(context.CreateInnerContext(context.BranchOwner));

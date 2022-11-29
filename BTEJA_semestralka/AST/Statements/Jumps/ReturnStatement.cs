@@ -24,4 +24,13 @@ internal class ReturnStatement : JumpStatement
         Value = Expression.Execute(context);
         return this;
     }
+
+    internal override bool EndsInReturn(Execution.ExecutionContext context, Type datatype)
+    {
+        if (AnalyzedType == null)
+            AnalyzedType = Expression.Analyze(context);
+        if (AnalyzedType != datatype)
+            throw new Exceptions.InvalidDatatypeException($"Invalid datatype of return expression, expexted: {datatype}, given {AnalyzedType}", RowNumber);
+        return true;
+    }
 }

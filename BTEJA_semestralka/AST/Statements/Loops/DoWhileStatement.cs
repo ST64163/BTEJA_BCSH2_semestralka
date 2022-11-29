@@ -28,6 +28,8 @@ internal class DoWhileStatement : LoopStatement
         object condition;
         do
         {
+            if (CurrentRepetition++ >= outerContext.RepetitionLimit)
+                throw new Exceptions.StackOverflowException("Do-while loop reached limit of repeats", RowNumber);
             object result = Statement.Execute(innerContext);
             if (result is ReturnStatement)
                 return result;

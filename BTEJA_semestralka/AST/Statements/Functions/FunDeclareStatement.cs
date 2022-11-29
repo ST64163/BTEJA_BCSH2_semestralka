@@ -1,4 +1,5 @@
 ﻿using InterpreterSK.AST.Statements.Block;
+using InterpreterSK.Execution;
 using InterpreterSK.Execution.Elements;
 using ExecutionContext = InterpreterSK.Execution.ExecutionContext;
 
@@ -24,12 +25,15 @@ internal class FunDeclareStatement : FunStatement
         List<Variable> parameters = new();
         Parameters.ForEach(
             parameter => parameters.Add((Variable)parameter.Execute(outerContext)));
-        Function function = new(Identifier, ReturnType, parameters, Block);
+        CheckNames(outerContext);
+        Function function = new(Identifier, ReturnType, parameters, Block, outerContext);
         outerContext.FunctionContext.AddFunction(function);
 
         ExecutionContext innerContext = outerContext.CreateInnerContext(function);
         parameters.ForEach(variable => innerContext.VariableContext.AddVariable(variable));
-        Block.Analyze(innerContext); // check if it has return and if they are the right datatype
+        Block.Analyze(innerContext);
+        if (!Block.EndsInReturn(innerContext, ReturnType))
+            throw new Exceptions.InvalidSyntaxException("Not all paths in function return value", RowNumber);
     }
 
     internal override object Execute(ExecutionContext context)
@@ -37,8 +41,19 @@ internal class FunDeclareStatement : FunStatement
         List<Variable> parameters = new();
         Parameters.ForEach(
             parameter => parameters.Add((Variable)parameter.Execute(context)));
-        Function function = new(Identifier, ReturnType, parameters, Block);
+        Function function = new(Identifier, ReturnType, parameters, Block, context);
         context.FunctionContext.AddFunction(function);
         return this;
+    }
+
+    private void CheckNames(ExecutionContext context) 
+    {
+        foreach (var parameter in Parameters)
+            if (Parameters.Where(param => parameter.Identifier == param.Identifier).Count() > 1)
+                throw new Exceptions.InvalidSyntaxException($"Cannot declare two parameters with same name: {parameter.Identifier}", parameter.RowNumber);
+        List<Function> functions = context.FunctionContext.Functions;
+        foreach (var function in functions)
+            if (functions.Where(fun => fun.Identifier == function.Identifier && fun.Context == function.Context).Count() > 1)
+                throw new Exceptions.InvalidSyntaxException($"Cannot declare two functions in the same context with the same name: {function.Identifier}", RowNumber);
     }
 }

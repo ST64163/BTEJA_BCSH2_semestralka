@@ -51,4 +51,20 @@ internal class IfStatement : Statement
         if (conditionType != typeof(bool))
             throw new Exceptions.InvalidDatatypeException("Condition must be evaluated as Boolean", RowNumber);
     }
+
+    internal override bool EndsInReturn(ExecutionContext outerContext, Type datatype)
+    {
+        bool hasReturn = true;
+        foreach ((Expression?, Statement) pair in Conditionments)
+        {
+            Statement statement = pair.Item2;
+            ExecutionContext innerContext = outerContext.CreateInnerContext(outerContext.BranchOwner);
+            if (!statement.EndsInReturn(innerContext, datatype))
+            { 
+                hasReturn = false;
+                break;
+            }
+        }
+        return hasReturn;
+    }
 }

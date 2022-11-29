@@ -7,6 +7,7 @@ internal class ExecutionContext
     internal VariableContext VariableContext { get; }
     internal ExecutionContext? OuterContext { get; }
     internal object BranchOwner { get; }
+    internal int RepetitionLimit { get; } = 1000;
 
     internal ExecutionContext(FunctionContext functionContext, VariableContext variableContext, 
         ExecutionContext outerContext, object branchOwner)
@@ -27,8 +28,8 @@ internal class ExecutionContext
 
     internal ExecutionContext CreateInnerContext(object branchOwner)
     {
-        FunctionContext functionContext = FunctionContext.CreateCopy();
-        VariableContext variableContext = VariableContext.CreateCopy();
+        FunctionContext functionContext = FunctionContext.CreateCopy(this);
+        VariableContext variableContext = VariableContext.CreateCopy(this);
         return new(functionContext, variableContext, this, branchOwner);
     }
 }

@@ -22,11 +22,11 @@ internal class VariableContext
     internal void AddVariable(Variable variable)
         => Variables.Add(variable);
 
-    internal VariableContext CreateCopy()
+    internal VariableContext CreateCopy(ExecutionContext context)
     {
         List<Variable> variables = new();
         Variables.ForEach(variable => variables.Add(
-            new Variable(variable.Identifier, variable.Datatype, variable.Expression)
+            new Variable(variable.Identifier, variable.Datatype, variable.Expression, variable.Context ?? context)
             ));
         return new VariableContext(variables);
     }

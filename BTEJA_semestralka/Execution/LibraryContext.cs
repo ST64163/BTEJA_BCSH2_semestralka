@@ -1,6 +1,4 @@
-﻿using InterpreterSK.Execution.Library.Conversions;
-using InterpreterSK.Execution.Library.IO;
-using InterpreterSK.Execution.Library.Strings;
+﻿using InterpreterSK.Execution.Library;
 
 namespace InterpreterSK.Execution;
 
@@ -13,19 +11,18 @@ internal class LibraryContext : FunctionContext
 
     private void Init(Interpreter interpreter)
     {
-        Functions.Add(new FunPrint(interpreter));
-        Functions.Add(new FunPrintLn(interpreter));
-        Functions.Add(new FunReadLn(interpreter));
-
-        Functions.Add(new FunStrLen());
-        Functions.Add(new FunStrIndex());
-
-        Functions.Add(new FunIntToStr());
-        Functions.Add(new FunDoubleToStr());
-        Functions.Add(new FunBoolToStr());
-
-        Functions.Add(new FunStrToBool());
-        Functions.Add(new FunStrToInt());
-        Functions.Add(new FunStrToDouble());
+        GetType().Assembly.GetTypes()
+            .Where(type => type.IsClass && type.IsSubclassOf(typeof(LibraryFunction))).ToList()
+            .ForEach(type => 
+            {
+                if (type.Namespace != null)
+                {
+                    object? function = type.Namespace.EndsWith("IO")
+                        ? Activator.CreateInstance(type, interpreter)
+                        : Activator.CreateInstance(type);
+                    if (function != null)
+                        Functions.Add((LibraryFunction)function);
+                }
+            });
     }
 }
