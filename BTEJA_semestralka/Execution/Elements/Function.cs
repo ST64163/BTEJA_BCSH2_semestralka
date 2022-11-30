@@ -2,16 +2,11 @@
 using InterpreterSK.AST.Expressions;
 using InterpreterSK.AST.Statements.Block;
 using InterpreterSK.AST.Statements.Jumps;
-using System.Diagnostics;
 
 namespace InterpreterSK.Execution.Elements;
 
 internal class Function : ExecutionElement
 {
-
-    private static int ids = 0;
-    private int id;
-
     internal BlockStatement Block { get; }
 
     internal List<Variable> Parameters { get; }
@@ -21,7 +16,6 @@ internal class Function : ExecutionElement
     internal Function(string identifier, Type datatype, List<Variable> parameters, BlockStatement block, ExecutionContext context) 
         : base(identifier, datatype, context) 
     {
-        id = ids++;
         Parameters = parameters;
         Block = block;
     }
@@ -35,7 +29,6 @@ internal class Function : ExecutionElement
 
     internal object Call(ExecutionContext outerContext, List<Expression> parameters, int rowNumber)
     {
-        Debug.WriteLine("DEBUG - CALL - " + id + " " + Identifier + " ");
         if (CurrentRepetition++ >= outerContext.RepetitionLimit)
             throw new Exceptions.StackOverflowException("Function invocation caused stack to overflow", rowNumber);
         ExecutionContext innerContext = outerContext.CreateInnerContext(this);

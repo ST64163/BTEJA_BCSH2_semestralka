@@ -19,8 +19,16 @@ internal class VariableContext
         return variable;
     }
 
-    internal void AddVariable(Variable variable)
-        => Variables.Add(variable);
+    internal void AddVariable(Variable newVariable)
+    {
+        foreach (var oldVariable in Variables)
+            if (oldVariable.Identifier == newVariable.Identifier)
+            {
+                Variables.Remove(oldVariable);
+                break;
+            }
+        Variables.Add(newVariable);
+    }
 
     internal VariableContext CreateCopy(ExecutionContext context)
     {

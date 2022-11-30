@@ -9,8 +9,8 @@ internal class ExecutionContext
     internal object BranchOwner { get; }
     internal int RepetitionLimit { get; } = 1000;
 
-    internal ExecutionContext(FunctionContext functionContext, VariableContext variableContext, 
-        ExecutionContext outerContext, object branchOwner)
+    private ExecutionContext(object branchOwner, FunctionContext functionContext,
+        VariableContext variableContext, ExecutionContext? outerContext)
     {
         FunctionContext = functionContext;
         VariableContext = variableContext;
@@ -18,13 +18,12 @@ internal class ExecutionContext
         BranchOwner = branchOwner;
     }
 
-    internal ExecutionContext(Interpreter interpreter)
-    {
-        FunctionContext = new LibraryContext(interpreter);
-        VariableContext = new(new());
-        OuterContext = null;
-        BranchOwner = interpreter;
-    }
+    internal ExecutionContext(FunctionContext functionContext, VariableContext variableContext,
+        ExecutionContext outerContext, object branchOwner) 
+        : this(branchOwner, functionContext, variableContext, outerContext) {}
+
+    internal ExecutionContext(Interpreter interpreter) 
+        : this(interpreter, new(new LibraryContext(interpreter)), new(new()), null) {}
 
     internal ExecutionContext CreateInnerContext(object branchOwner)
     {

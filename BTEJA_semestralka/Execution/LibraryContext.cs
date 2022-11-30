@@ -1,19 +1,15 @@
-﻿using InterpreterSK.Execution.Library;
+﻿using InterpreterSK.Execution.Elements;
+using InterpreterSK.Execution.Library;
 
 namespace InterpreterSK.Execution;
 
 internal class LibraryContext : FunctionContext
 {
-    internal LibraryContext(Interpreter interpreter) : base(new())
-    {
-        Init(interpreter);
-    }
-
-    private void Init(Interpreter interpreter)
+    internal LibraryContext(Interpreter interpreter) : base(new List<Function>())
     {
         GetType().Assembly.GetTypes()
             .Where(type => type.IsClass && type.IsSubclassOf(typeof(LibraryFunction))).ToList()
-            .ForEach(type => 
+            .ForEach(type =>
             {
                 if (type.Namespace != null)
                 {
