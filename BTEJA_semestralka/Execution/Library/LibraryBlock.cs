@@ -1,5 +1,7 @@
 ﻿
+using InterpreterSK.AST.Expressions;
 using InterpreterSK.AST.Statements.Block;
+using InterpreterSK.AST.Statements.Jumps;
 
 namespace InterpreterSK.Execution.Library;
 
@@ -26,6 +28,7 @@ internal sealed class LibraryBlock : BlockStatement
     {
         if (GetResult == null)
             throw new Exception("Unexpected behaviour");
-        return GetResult(context);
+        object value = GetResult(context);
+        return new ReturnStatement(new LiteralExpression(value));
     }
 }

@@ -1,6 +1,5 @@
 ﻿using InterpreterSK.AST.Expressions;
 using InterpreterSK.Execution.Elements;
-using System.Diagnostics;
 
 namespace InterpreterSK.Execution.Library.Strings;
 

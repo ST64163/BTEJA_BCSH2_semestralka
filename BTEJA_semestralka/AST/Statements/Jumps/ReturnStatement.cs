@@ -6,12 +6,11 @@ internal class ReturnStatement : JumpStatement
 {
     internal Expression Expression { get; }
 
-    internal object Value { get; private set; }
+    internal object? Value { get; private set; }
 
     public ReturnStatement(Expression expression)
     {
         Expression = expression;
-        Value = expression;
     }
 
     protected override void Analyzation(Execution.ExecutionContext context)
@@ -30,7 +29,7 @@ internal class ReturnStatement : JumpStatement
         if (AnalyzedType == null)
             AnalyzedType = Expression.Analyze(context);
         if (AnalyzedType != datatype)
-            throw new Exceptions.InvalidDatatypeException($"Invalid datatype of return expression, expexted: {datatype}, given {AnalyzedType}", RowNumber);
+            throw new Exceptions.InvalidDatatypeException($"Invalid datatype of return expression", RowNumber);
         return true;
     }
 }

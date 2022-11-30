@@ -20,7 +20,7 @@ internal class Function : ExecutionElement
         Block = block;
     }
 
-    internal Function(string identifier, Type datatype, List<Variable> parameters, BlockStatement block)
+    protected Function(string identifier, Type datatype, List<Variable> parameters, BlockStatement block)
         : base(identifier, datatype, null)
     {
         Parameters = parameters;
@@ -37,7 +37,8 @@ internal class Function : ExecutionElement
         if (result is not ReturnStatement)
             throw new Exception("Unexpected behaviour");
         CurrentRepetition = 0;
-        return ((ReturnStatement)result).Value;
+        return ((ReturnStatement)result).Value 
+            ?? ((ReturnStatement)result).Expression.Execute(innerContext);
     }
 
     internal Type Analyze(ExecutionContext outerContext, List<Expression> parameters, int rowNumber)
