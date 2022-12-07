@@ -1,4 +1,6 @@
-﻿namespace InterpreterSK.Execution.Library.IO;
+﻿using System.Diagnostics;
+
+namespace InterpreterSK.Execution.Library.IO;
 
 internal class FunReadLn : LibraryFunction
 {
@@ -12,6 +14,6 @@ internal class FunReadLn : LibraryFunction
 
     protected override object GetResult(ExecutionContext context)
     {
-        return interpreter.Read();
+        return interpreter.ReadLine();
     }
 }

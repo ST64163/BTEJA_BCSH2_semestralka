@@ -12,7 +12,7 @@ internal class FunDeclareStatement : FunStatement
     internal BlockStatement Block { get; }
 
     internal FunDeclareStatement(string identifier, List<ParamDeclaration> parameters, 
-        Type returnType, BlockStatement block) : base(identifier)
+        Type returnType, BlockStatement block, int rowNumber) : base(identifier, rowNumber)
     {
         ReturnType = returnType;
         Parameters = parameters;
@@ -55,5 +55,12 @@ internal class FunDeclareStatement : FunStatement
         foreach (var function in functions)
             if (functions.Where(fun => fun.Identifier == function.Identifier && fun.Context == function.Context).Count() > 1)
                 throw new Exceptions.InvalidSyntaxException($"Cannot declare two functions in the same context with the same name: {function.Identifier}", RowNumber);
+    }
+
+    internal override string GetToString(int level, out bool isLeaf)
+    {
+        isLeaf = false;
+        return string.Concat(Enumerable.Repeat("-", level++)) + GetType().Name + ": " + Identifier + "\n"
+            + Block.GetToString(level, out bool _);
     }
 }

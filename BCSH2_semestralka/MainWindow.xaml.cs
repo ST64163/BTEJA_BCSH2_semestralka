@@ -21,7 +21,7 @@ namespace BTEJA_BCSH2_semestralka
             Interpreter interpreter = new();
             void WriteCallback(object sender, string message) => PrintLine(message);
             interpreter.WriteEvent += WriteCallback;
-            interpreter.Debug(sourceCode);
+            interpreter.Build(sourceCode);
         }
 
         private void ClickInterpret(object sender, RoutedEventArgs e)

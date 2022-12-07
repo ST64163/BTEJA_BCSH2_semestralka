@@ -2,7 +2,7 @@
 
 internal class OrCondition : BinaryCondition
 {
-    internal OrCondition(Expression left, Expression right) : base(left, right) { }
+    internal OrCondition(Expression left, Expression right, int rowNumber) : base(left, right, rowNumber) { }
 
     protected override void CheckTypes(Type leftType, Type rightType)
     {

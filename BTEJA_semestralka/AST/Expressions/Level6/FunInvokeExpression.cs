@@ -7,7 +7,7 @@ internal class FunInvokeExpression : InvokeExpression
 
     internal List<Expression> Parameters { get; }
 
-    public FunInvokeExpression(string identifier, List<Expression> parameters) : base(identifier)
+    public FunInvokeExpression(string identifier, List<Expression> parameters, int rowNumber) : base(identifier, rowNumber)
     {
         Parameters = parameters;
     }

@@ -6,7 +6,7 @@ internal class LiteralExpression : Expression
 {
     internal object Value { get; set; }
 
-    internal LiteralExpression(object value) 
+    internal LiteralExpression(object value, int rowNumber) : base(rowNumber) 
     {
         Value = value;
     }
@@ -16,4 +16,10 @@ internal class LiteralExpression : Expression
 
     internal override object Execute(ExecutionContext context)
         => Value;
+
+    internal override string GetToString(int level, out bool isLeaf)
+    {
+        isLeaf = true;
+        return string.Concat(Enumerable.Repeat("-", level)) + GetType().Name + ": " + Value.ToString() + "\n";
+    }
 }

@@ -2,6 +2,8 @@
 
 internal abstract class Expression : Node 
 {
+    internal Expression(int rowNumber) : base(rowNumber) {}
+
     internal override Type Analyze(Execution.ExecutionContext context)
     {
         if (AnalyzedType == null)

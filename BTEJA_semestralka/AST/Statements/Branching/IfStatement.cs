@@ -1,4 +1,5 @@
 ﻿using InterpreterSK.AST.Expressions;
+using System.Diagnostics;
 using ExecutionContext = InterpreterSK.Execution.ExecutionContext;
 
 namespace InterpreterSK.AST.Statements.Branching;
@@ -7,7 +8,7 @@ internal class IfStatement : Statement
 {
     internal List<(Expression?, Statement)> Conditionments { get; }
 
-    internal IfStatement(List<(Expression?, Statement)> conditionments)
+    internal IfStatement(List<(Expression?, Statement)> conditionments, int rowNumber) : base(rowNumber)
     {
         Conditionments = conditionments;
     }
@@ -39,6 +40,7 @@ internal class IfStatement : Statement
             if ((bool)condition)
             {
                 object result = statement.Execute(innerContext);
+                Debug.WriteLine("DEBUG - IfStatement - isTrue " + result);
                 if (result is JumpStatement)
                     return result;
             }
@@ -66,5 +68,16 @@ internal class IfStatement : Statement
             }
         }
         return hasReturn;
+    }
+
+
+    internal override string GetToString(int level, out bool isLeaf)
+    { 
+        isLeaf = false;
+        string toString = string.Concat(Enumerable.Repeat("-", level++)) + GetType().Name + "\n";
+        Conditionments.ForEach(pair => 
+            toString += pair.Item1?.GetToString(level, out bool _) + "\n" 
+                + pair.Item2.GetToString(level, out bool _));
+        return toString.Remove(toString.Length - 1);
     }
 }

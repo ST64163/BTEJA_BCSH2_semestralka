@@ -18,7 +18,7 @@ internal class FunPrintLn : LibraryFunction
         Expression expression = Parameters[0].Expression
             ?? throw new Exception("Unexpected behaviour");
         string message = (string)expression.Execute(context);
-        interpreter.Write(message + "\n");
-        return true;
+        interpreter.WriteLine(message);
+        return "OK";
     }
 }

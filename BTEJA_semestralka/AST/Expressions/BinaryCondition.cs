@@ -3,7 +3,7 @@ namespace InterpreterSK.AST.Expressions;
 
 internal abstract class BinaryCondition : BinaryExpression
 {
-    protected BinaryCondition(Expression left, Expression right) : base(left, right) {}
+    protected BinaryCondition(Expression left, Expression right, int rowNumber) : base(left, right, rowNumber) {}
 
     internal override Type Analyze(Execution.ExecutionContext context)
     {

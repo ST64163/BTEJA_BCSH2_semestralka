@@ -1,4 +1,5 @@
 ﻿
+using InterpreterSK.AST;
 using InterpreterSK.AST.Expressions;
 using InterpreterSK.AST.Statements.Block;
 using InterpreterSK.AST.Statements.Jumps;
@@ -12,7 +13,7 @@ internal sealed class LibraryBlock : BlockStatement
     private readonly Type datatype;
     internal GetResultCallback? GetResult { get; set; }
 
-    internal LibraryBlock(Type datatype) : base(new())
+    internal LibraryBlock(Type datatype) : base(new(), -1)
     {
         this.datatype = datatype;
     }
@@ -29,6 +30,6 @@ internal sealed class LibraryBlock : BlockStatement
         if (GetResult == null)
             throw new Exception("Unexpected behaviour");
         object value = GetResult(context);
-        return new ReturnStatement(new LiteralExpression(value));
+        return new ReturnStatement(new LiteralExpression(value, RowNumber), RowNumber).Execute(context);
     }
 }

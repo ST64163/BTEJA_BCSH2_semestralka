@@ -17,6 +17,6 @@ internal class FunStrToBool : LibraryFunction
             return true;
         if (str == "false") 
             return false;
-        throw new Exceptions.InvalidOperationException($"Parameter {str} cannot be converted to Boolean", expression.RowNumber);
+        throw new Exceptions.InvalidDatatypeException($"String \"{str}\" cannot be converted to Boolean", expression.RowNumber);
     }
 }

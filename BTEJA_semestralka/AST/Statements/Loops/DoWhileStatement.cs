@@ -9,7 +9,7 @@ internal class DoWhileStatement : LoopStatement
 {
     internal Expression Condition { get; }
 
-    public DoWhileStatement(Expression condition, BlockStatement block) : base(block)
+    public DoWhileStatement(Expression condition, BlockStatement block, int rowNumber) : base(block, rowNumber)
     {
         Condition = condition;
     }

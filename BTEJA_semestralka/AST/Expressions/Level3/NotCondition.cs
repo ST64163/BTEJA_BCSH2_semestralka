@@ -2,7 +2,7 @@
 
 internal class NotCondition : UnaryCondition
 {
-    public NotCondition(Expression expression) : base(expression) { }
+    public NotCondition(Expression expression, int rowNumber) : base(expression, rowNumber) { }
 
     protected override void CheckType(Type type)
     {

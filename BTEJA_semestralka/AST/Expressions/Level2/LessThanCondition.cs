@@ -3,7 +3,7 @@ namespace InterpreterSK.AST.Expressions.Level2;
 
 internal class LessThanCondition : BinaryCondition
 {
-    public LessThanCondition(Expression left, Expression right) : base(left, right) { }
+    public LessThanCondition(Expression left, Expression right, int rowNumber) : base(left, right, rowNumber) { }
 
     protected override void CheckTypes(Type leftType, Type rightType)
     {

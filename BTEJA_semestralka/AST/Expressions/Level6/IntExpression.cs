@@ -2,5 +2,5 @@
 
 internal class IntExpression : LiteralExpression
 {
-    public IntExpression(int value) : base(value) { }
+    public IntExpression(int value, int rowNumber) : base(value, rowNumber) { }
 }

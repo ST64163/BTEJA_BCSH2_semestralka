@@ -1,4 +1,5 @@
 ﻿using InterpreterSK.AST.Expressions;
+using InterpreterSK.AST.Expressions.Level6;
 using InterpreterSK.Execution.Elements;
 
 namespace InterpreterSK.AST.Statements.Variables;
@@ -6,9 +7,10 @@ namespace InterpreterSK.AST.Statements.Variables;
 internal class VarDeclareStatement : VarStatement
 {
     internal Type Datatype { get; }
-    internal Expression? Expression { get; }
+    internal Expression? Expression { get; private set; }
 
-    internal VarDeclareStatement(string identifier, Type datatype, Expression? expression) : base(identifier)
+    internal VarDeclareStatement(string identifier, Type datatype, Expression? expression, int rowNumber) 
+        : base(identifier, rowNumber)
     {
         Datatype = datatype;
         Expression = expression;
@@ -20,6 +22,11 @@ internal class VarDeclareStatement : VarStatement
         if (type != null && Datatype != type)
             throw new Exceptions.InvalidDatatypeException("Cannot assign expression to variable of different datatype", RowNumber);
         CheckNames(context);
+        if (execute && Expression != null)
+        {
+            object value = Expression.Execute(context);
+            Expression = new LiteralExpression(value, RowNumber);
+        }
         Variable variable = new(Identifier, Datatype, Expression, context);
         context.VariableContext.AddVariable(variable);
     }

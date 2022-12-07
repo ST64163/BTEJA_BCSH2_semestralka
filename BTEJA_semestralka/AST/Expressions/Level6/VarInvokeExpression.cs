@@ -5,7 +5,7 @@ namespace InterpreterSK.AST.Expressions.Level6;
 
 internal class VarInvokeExpression : InvokeExpression
 {
-    public VarInvokeExpression(string identifier) : base(identifier) {}
+    public VarInvokeExpression(string identifier, int rowNumber) : base(identifier, rowNumber) {}
 
     protected override Type Analyzation(ExecutionContext context)
         => FindVariable(context).Datatype;

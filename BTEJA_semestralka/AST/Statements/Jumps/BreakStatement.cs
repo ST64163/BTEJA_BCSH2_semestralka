@@ -2,6 +2,8 @@
 
 internal class BreakStatement : JumpStatement
 {
+    public BreakStatement(int rowNumber) : base(rowNumber) {}
+
     protected override void Analyzation(Execution.ExecutionContext context) 
     {
         if (context.BranchOwner is not LoopStatement)

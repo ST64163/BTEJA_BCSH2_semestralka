@@ -2,5 +2,5 @@
 
 internal class DoubleExpression : LiteralExpression
 {
-    public DoubleExpression(double value) : base(value) { }
+    public DoubleExpression(double value, int rowNumber) : base(value, rowNumber) { }
 }

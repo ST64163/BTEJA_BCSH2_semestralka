@@ -6,9 +6,9 @@ internal class ReturnStatement : JumpStatement
 {
     internal Expression Expression { get; }
 
-    internal object? Value { get; private set; }
+    private object? value;
 
-    public ReturnStatement(Expression expression)
+    public ReturnStatement(Expression expression, int rowNumber) : base(rowNumber)
     {
         Expression = expression;
     }
@@ -20,8 +20,15 @@ internal class ReturnStatement : JumpStatement
 
     internal override object Execute(Execution.ExecutionContext context)
     {
-        Value = Expression.Execute(context);
+        value = Expression.Execute(context);
         return this;
+    }
+
+    internal object GetValue()
+    {
+        if (value == null)
+            throw new Exception("Unexpected behaviour");
+        return value;
     }
 
     internal override bool EndsInReturn(Execution.ExecutionContext context, Type datatype)

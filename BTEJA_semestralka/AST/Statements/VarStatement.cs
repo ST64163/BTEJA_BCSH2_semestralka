@@ -5,7 +5,7 @@ internal abstract class VarStatement : Statement
 {
     internal string Identifier { get; }
 
-    internal VarStatement(string identifier)
+    internal VarStatement(string identifier, int rowNumber) : base(rowNumber)
     { 
         Identifier = identifier;
     }
@@ -23,4 +23,10 @@ internal abstract class VarStatement : Statement
         => Operation(context, false);
 
     protected abstract void Operation(Execution.ExecutionContext context, bool execute);
+
+    internal override string GetToString(int level, out bool isLeaf)
+    {
+        isLeaf = true;
+        return string.Concat(Enumerable.Repeat("-", level)) + GetType().Name + ": " + Identifier + "\n";
+    }
 }

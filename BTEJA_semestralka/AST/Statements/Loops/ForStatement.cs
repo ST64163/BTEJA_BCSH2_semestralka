@@ -12,7 +12,8 @@ internal class ForStatement : LoopStatement
     internal Expression Start { get; }
     internal Expression End { get; }
 
-    public ForStatement(string identifier, Expression start, Expression end, Statement statement) : base(statement)
+    public ForStatement(string identifier, Expression start, Expression end, Statement statement, int rowNumber) 
+        : base(statement, rowNumber)
     {
         VariableIdentifier = new(identifier);
         Start = start;
@@ -53,13 +54,13 @@ internal class ForStatement : LoopStatement
         Variable? variable = innerContext.VariableContext.Variables.Find(variable => variable.Identifier == VariableIdentifier);
         if (variable == null)
         {
-            variable = new Variable(VariableIdentifier, typeof(int), new IntExpression(startValue), innerContext);
+            variable = new Variable(VariableIdentifier, typeof(int), new IntExpression(startValue, RowNumber), innerContext);
             innerContext.VariableContext.AddVariable(variable);
         }
         else
         { 
             CheckVariable(variable.Datatype);
-            variable.Expression = new IntExpression(startValue);
+            variable.Expression = new IntExpression(startValue, RowNumber);
         }
 
         for (int i = startValue; i < endValue; i++)

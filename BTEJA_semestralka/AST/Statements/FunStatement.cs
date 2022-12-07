@@ -5,7 +5,7 @@ internal abstract class FunStatement : Statement
 {
     internal string Identifier { get; }
 
-    internal FunStatement(string identifier)
+    internal FunStatement(string identifier, int rowNumber) : base(rowNumber)
     {
         Identifier = identifier;
     }

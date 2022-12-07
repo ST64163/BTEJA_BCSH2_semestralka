@@ -2,6 +2,8 @@
 
 internal abstract class Statement : Node
 {
+    internal Statement(int rowNumber) : base(rowNumber) {}
+
     internal abstract bool EndsInReturn(Execution.ExecutionContext context, Type datatype);
 
     internal override Type Analyze(Execution.ExecutionContext context)

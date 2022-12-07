@@ -3,7 +3,7 @@ namespace InterpreterSK.AST.Expressions.Level5;
 
 internal class ModuloExpression : BinaryExpression
 {
-    public ModuloExpression(Expression left, Expression right) : base(left, right) { }
+    public ModuloExpression(Expression left, Expression right, int rowNumber) : base(left, right, rowNumber) { }
 
     protected override void CheckTypes(Type leftType, Type rightType)
     {

@@ -7,7 +7,7 @@ internal abstract class BinaryExpression : Expression
     internal Expression Left { get; }
     internal Expression Right { get; }
 
-    public BinaryExpression(Expression left, Expression right)
+    public BinaryExpression(Expression left, Expression right, int rowNumber) : base(rowNumber)
     {
         Left = left;
         Right = right;
@@ -32,4 +32,12 @@ internal abstract class BinaryExpression : Expression
     protected abstract object Execution(ExecutionContext context, object leftValue, object rightValue);
 
     protected abstract void CheckTypes(Type leftType, Type rightType);
+
+    internal override string GetToString(int level, out bool isLeaf)
+    {
+        isLeaf = false;
+        return string.Concat(Enumerable.Repeat("-", level++)) + GetType().Name + ": " + "\n" 
+        + Left.GetToString(level, out bool _) + "\n"
+        + Right.GetToString(level, out bool leaf) + (!leaf ? "\n" : "");
+    }
 }

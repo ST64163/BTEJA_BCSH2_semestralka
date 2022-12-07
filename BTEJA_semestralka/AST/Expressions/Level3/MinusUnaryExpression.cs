@@ -2,7 +2,7 @@
 
 internal class MinusUnaryExpression : UnaryExpression
 {
-    public MinusUnaryExpression(Expression expression) : base(expression) { }
+    public MinusUnaryExpression(Expression expression, int rowNumber) : base(expression, rowNumber) { }
 
     protected override void CheckType(Type type)
     {

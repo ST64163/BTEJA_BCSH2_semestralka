@@ -2,5 +2,5 @@
 
 internal class BoolExpression : LiteralExpression
 {
-    public BoolExpression(bool value) : base(value) { }
+    public BoolExpression(bool value, int rowNumber) : base(value, rowNumber) { }
 }

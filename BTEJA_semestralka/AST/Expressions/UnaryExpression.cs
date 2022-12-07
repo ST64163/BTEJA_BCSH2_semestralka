@@ -6,7 +6,10 @@ internal abstract class UnaryExpression : Expression
 {
     internal Expression Expression { get; }
 
-    internal UnaryExpression(Expression expression) => Expression = expression;
+    internal UnaryExpression(Expression expression, int rowNumber) : base(rowNumber)
+    {
+        Expression = expression;
+    }
 
     protected override Type Analyzation(ExecutionContext context)
     {
@@ -25,4 +28,11 @@ internal abstract class UnaryExpression : Expression
     protected abstract object Execution(ExecutionContext context, object value);
 
     protected abstract void CheckType(Type type);
+
+    internal override string GetToString(int level, out bool isLeaf)
+    {
+        isLeaf = false;
+        return string.Concat(Enumerable.Repeat("-", level)) + GetType().Name + ": " + "\n" 
+            + Expression.GetToString(level++, out bool leaf) + (!leaf ? "\n" : "");
+    }
 }

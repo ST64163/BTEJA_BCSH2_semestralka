@@ -7,7 +7,7 @@ internal class BlockStatement : Statement
 {
     internal List<Statement> Statements { get; }
 
-    internal BlockStatement(List<Statement> statements)
+    internal BlockStatement(List<Statement> statements, int rowNumber) : base(rowNumber)
     {
         Statements = statements;
     }
@@ -43,5 +43,13 @@ internal class BlockStatement : Statement
             }
         }
         return hasReturn;
+    }
+
+    internal override string GetToString(int level, out bool isLeaf)
+    {
+        isLeaf = false;
+        string toString = string.Concat(Enumerable.Repeat("-", level++)) + GetType().Name + "\n";
+        Statements.ForEach(statement => toString += statement.GetToString(level, out bool leaf) + (!leaf ? "\n" : ""));
+        return toString;
     }
 }

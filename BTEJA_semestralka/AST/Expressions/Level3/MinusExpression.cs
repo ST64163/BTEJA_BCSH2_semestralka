@@ -2,7 +2,7 @@
 
 internal class MinusExpression : BinaryExpression
 {
-    public MinusExpression(Expression left, Expression right) : base(left, right) { }
+    public MinusExpression(Expression left, Expression right, int rowNumber) : base(left, right, rowNumber) { }
 
     protected override void CheckTypes(Type leftType, Type rightType)
     {

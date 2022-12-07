@@ -19,6 +19,6 @@ internal class FunPrint : LibraryFunction
             ?? throw new Exception("Unexpected behaviour");
         string message = (string)expression.Execute(context);
         interpreter.Write(message);
-        return true;
+        return "OK";
     }
 }

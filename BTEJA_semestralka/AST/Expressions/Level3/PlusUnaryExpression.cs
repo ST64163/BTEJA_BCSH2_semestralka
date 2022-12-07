@@ -3,7 +3,7 @@
 internal class PlusUnaryExpression : UnaryExpression
 {
 
-    internal PlusUnaryExpression(Expression expression) : base(expression) { }
+    internal PlusUnaryExpression(Expression expression, int rowNumber) : base(expression, rowNumber) { }
 
     protected override void CheckType(Type type)
     {

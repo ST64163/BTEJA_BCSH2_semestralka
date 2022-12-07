@@ -4,6 +4,7 @@ using InterpreterSK.AST.Statements.Block;
 using InterpreterSK.LexicalAnalysis;
 using InterpreterSK.SemanticAnalysis;
 using InterpreterSK.Tokens;
+using System.Diagnostics;
 using ExecutionContext = Execution.ExecutionContext;
 
 public delegate void WriteHandler(object sender, string message);
@@ -18,7 +19,7 @@ public class Interpreter
     private BlockStatement? builtProgram;
 
     public event WriteHandler? WriteEvent;
-    public event ReadHandler? ReadEvent;
+    public event ReadHandler? ReadLineEvent;
 
     public Interpreter()
     {
@@ -28,83 +29,93 @@ public class Interpreter
 
     public void Interpret(string code)
     {
-        if (code == string.Empty)
-            return;
-        if (sourceCode != null && sourceCode == code && builtProgram != null)
+        if (code != string.Empty)
         {
-            Execute(builtProgram);
-        }
-        else
-        {
-            builtProgram = Build(code);
-            if (builtProgram != null) 
+            if (sourceCode != null && sourceCode == code && builtProgram != null)
                 Execute(builtProgram);
+            else
+            {
+                builtProgram = Rebuild(code);
+                if (builtProgram != null)
+                    Execute(builtProgram);
+            }
         }
     }
 
-    public void Debug(string code)
+    public void Build(string code)
     {
-        if (code == string.Empty)
-            return;
-        if (sourceCode == null || sourceCode != code || builtProgram == null)
-            builtProgram = Build(code);
+        if (code != string.Empty)
+            if (sourceCode == null || sourceCode != code || builtProgram == null)
+                builtProgram = Rebuild(code);
     }
 
-    private BlockStatement? Build(string code)
+    private BlockStatement? Rebuild(string code)
     {
         try
         {
+            WriteLine("~ Build start");
             sourceCode = code;
             lexer.LoadProgram(code, out List<Token> tokens);
             /*
-                tokens.ForEach(token =>
+            tokens.ForEach(token =>
                     {
                         string tokenString = token.ToString();
                         string valueString = "";
                         if (token is IdentifierToken || token is IntToken || token is DoubleToken || token is BoolToken || token is StringToken)
-                            valueString = " - " + token.Value.ToString();
+                            valueString = " - " + token.Value?.ToString();
                         if (token is ReservedToken || token is OperatorToken)
                             valueString = " - " + Token.TokenTypeToString.GetValueOrDefault(token.TokenType);
                         Write(tokenString + valueString);
                     });
-                */
-            Write("Lexer: OK");
+            */
+            WriteLine("~ Lexical analysis: OK");
             parser.Parse(tokens, out BlockStatement program);
-            Write("Parser: OK");
+            /*
+             Write(program.ToString());
+             */
+            WriteLine("~ Parsing: OK");
             ExecutionContext globalContext = new(this);
             program.Analyze(globalContext);
-            Write("Analysis: OK");
+            WriteLine("~ Semantic analysis: OK");
 
-            Write("Build complete");
+            WriteLine("~ Build complete");
             return program;
         }
         catch (Exception e)
         {
             sourceCode = null;
-            Write(e.Message);
+            WriteLine(e.Message);
             return null;
         }
     }
 
     private void Execute(BlockStatement program)
     {
+        program.Execute(new(this));
         try
         {
-            program.Execute(new(this));
+            WriteLine("~ Program: ");
+            //program.Execute(new(this));
         }
         catch (Exception e)
         {
-            Write(e.Message);
+            WriteLine(e.Message);
         }
     }
 
-    internal string Read()
+    internal string ReadLine()
     {
-        string message = "";
-        if (ReadEvent != null)
-            message = ReadEvent.Invoke(this);
+        string message = ReadLineEvent?.Invoke(this) ?? "";
         return message;
     }
 
-    internal void Write(string message) => WriteEvent?.Invoke(this, message);
+    internal void Write(string message)
+    {
+        WriteEvent?.Invoke(this, message);
+    }
+
+    internal void WriteLine(string message)
+    {
+        WriteEvent?.Invoke(this, message + "\n");
+    }
 }

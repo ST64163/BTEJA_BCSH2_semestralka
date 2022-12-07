@@ -8,7 +8,7 @@ internal class WhileStatement : LoopStatement
 {
     internal Expression Condition { get; }
 
-    public WhileStatement(Expression condition, Statement statement) : base(statement)
+    public WhileStatement(Expression condition, Statement statement, int rowNumber) : base(statement, rowNumber)
     {
         Condition = condition;
     }
