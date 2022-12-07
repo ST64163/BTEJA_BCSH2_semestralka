@@ -33,7 +33,7 @@ internal class VarDeclareStatement : VarStatement
 
     private void CheckNames(Execution.ExecutionContext context)
     {
-        List<Variable> variables = context.VariableContext.Variables;
+        List<Variable> variables = context.VariableContext.GlobalVariables;
         foreach (var variable in variables)
             if (variables.Where(var => var.Identifier == variable.Identifier && var.Context == variable.Context).Count() > 1)
                 throw new Exceptions.InvalidSyntaxException($"Cannot declare two functions in the same context with the same name: {variable.Identifier}", RowNumber);

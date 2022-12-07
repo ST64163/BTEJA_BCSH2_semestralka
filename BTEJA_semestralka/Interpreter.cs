@@ -4,7 +4,6 @@ using InterpreterSK.AST.Statements.Block;
 using InterpreterSK.LexicalAnalysis;
 using InterpreterSK.SemanticAnalysis;
 using InterpreterSK.Tokens;
-using System.Diagnostics;
 using ExecutionContext = Execution.ExecutionContext;
 
 public delegate void WriteHandler(object sender, string message);
@@ -91,11 +90,10 @@ public class Interpreter
 
     private void Execute(BlockStatement program)
     {
-        program.Execute(new(this));
         try
         {
             WriteLine("~ Program: ");
-            //program.Execute(new(this));
+            program.Execute(new(this));
         }
         catch (Exception e)
         {

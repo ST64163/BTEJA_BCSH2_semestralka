@@ -1,28 +1,32 @@
 ﻿using InterpreterSK.Execution.Elements;
+using InterpreterSK.Execution.Library;
 
 namespace InterpreterSK.Execution;
 
 internal class FunctionContext
 {
     internal static List<Function>? LibraryFunctions { get; private set; } = null; 
-    internal List<Function> Functions { get; }
+    internal List<Function> GlobalFunctions { get; }
+    internal List<Function> LocalFunctions { get; }
+    internal List<Function> Functions { get => LocalFunctions.Concat(GlobalFunctions).Concat(LibraryFunctions ?? new()).ToList(); }
 
     internal FunctionContext(LibraryContext library)
     { 
         if (LibraryFunctions == null)
-            LibraryFunctions = library.Functions;
-        Functions = new();
+            LibraryFunctions = library.GlobalFunctions;
+        GlobalFunctions = new();
+        LocalFunctions = new();
     }
 
     internal FunctionContext(List<Function> functions)
     {
-        Functions = functions;
+        GlobalFunctions = functions;
+        LocalFunctions = new();
     }
 
     internal Function GetFunction(string identifier, int rowNumber)
     {
-        Function? function = Functions.Find(fun => fun.Identifier == identifier) 
-            ?? LibraryFunctions?.Find(fun => fun.Identifier == identifier);
+        Function? function = Functions.Find(fun => fun.Identifier == identifier);
         if (function == null)
             throw new Exceptions.InvalidInvocationException($"Calling unknown function: {identifier}", rowNumber);
         return function;
@@ -30,27 +34,35 @@ internal class FunctionContext
 
     internal void AddFunction(Function newFunction)
     {
-        foreach (var oldFunction in Functions)
-            if (oldFunction.Identifier == newFunction.Identifier)
-            { 
-                Functions.Remove(oldFunction);
-                break;
-            }
-        Functions.Add(newFunction);
+        LocalFunctions.Add(newFunction);
     }
 
     internal FunctionContext CreateCopy(ExecutionContext context)
     {
-        List<Function> functions = new();
-        Functions.ForEach(
-            function => {
+        List<Function> oldFunctions = LocalFunctions;
+        GlobalFunctions.ForEach(globalFunction => 
+        {
+            bool add = true;
+            foreach (var localFunction in LocalFunctions)
+                if (localFunction.Identifier == globalFunction.Identifier)
+                {
+                    add = false;
+                    break;
+                }
+            if (add)
+                oldFunctions.Add(globalFunction);
+        });
+
+        List<Function> newFunctions = new();
+        oldFunctions.ForEach(
+            oldFunction => {
                 List<Variable> parameters = new();
-                function.Parameters.ForEach(
+                oldFunction.Parameters.ForEach(
                     parameter => parameters.Add(
-                        new Variable(parameter.Identifier, parameter.Datatype, null, function.Context ?? context)));
-                functions.Add(
-                    new Function(function.Identifier, function.Datatype, parameters, function.Block, function.Context ?? context));
+                        new Variable(parameter.Identifier, parameter.Datatype, null, oldFunction.Context ?? context)));
+                newFunctions.Add(
+                    new Function(oldFunction.Identifier, oldFunction.Datatype, parameters, oldFunction.Block, oldFunction.Context ?? context));
             });
-        return new FunctionContext(functions);
+        return new FunctionContext(newFunctions);
     }
 }

@@ -40,9 +40,9 @@ internal class IfStatement : Statement
             if ((bool)condition)
             {
                 object result = statement.Execute(innerContext);
-                Debug.WriteLine("DEBUG - IfStatement - isTrue " + result);
                 if (result is JumpStatement)
                     return result;
+                break;
             }
         }
         return this;

@@ -4,11 +4,14 @@ namespace InterpreterSK.Execution;
 
 internal class VariableContext
 {
-    internal List<Variable> Variables { get; }
+    internal List<Variable> GlobalVariables { get; }
+    internal List<Variable> LocalVariables { get; }
+    internal List<Variable> Variables { get => LocalVariables.Concat(GlobalVariables).ToList(); }
 
     internal VariableContext(List<Variable> variables)
     {
-        Variables = variables;
+        GlobalVariables = variables;
+        LocalVariables = new();
     }
 
     internal Variable GetVariable(string identifier, int rowNumber)
@@ -21,21 +24,24 @@ internal class VariableContext
 
     internal void AddVariable(Variable newVariable)
     {
-        foreach (var oldVariable in Variables)
-            if (oldVariable.Identifier == newVariable.Identifier)
-            {
-                Variables.Remove(oldVariable);
-                break;
-            }
-        Variables.Add(newVariable);
+        LocalVariables.Add(newVariable);
     }
 
     internal VariableContext CreateCopy(ExecutionContext context)
     {
-        List<Variable> variables = new();
-        Variables.ForEach(variable => variables.Add(
-            new Variable(variable.Identifier, variable.Datatype, variable.Expression, variable.Context ?? context)
-            ));
+        List<Variable> variables = LocalVariables;
+        GlobalVariables.ForEach(globalVariable =>
+        {
+            bool add = true;
+            foreach (var localVariable in LocalVariables)
+                if (localVariable.Identifier == globalVariable.Identifier)
+                {
+                    add = false;
+                    break;
+                }
+            if (add)
+                variables.Add(globalVariable);
+        });
         return new VariableContext(variables);
     }
 }

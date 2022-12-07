@@ -27,7 +27,7 @@ internal class ForStatement : LoopStatement
         Type startType = Start.Analyze(innerContext);
         Type endType = End.Analyze(innerContext);
         CheckStartEnd(startType, endType);
-        Variable? variable = innerContext.VariableContext.Variables.Find(variable => variable.Identifier == VariableIdentifier);
+        Variable? variable = innerContext.VariableContext.GlobalVariables.Find(variable => variable.Identifier == VariableIdentifier);
         if (variable == null)
         {
             variable = new Variable(VariableIdentifier, typeof(int), Start, innerContext);
@@ -51,7 +51,7 @@ internal class ForStatement : LoopStatement
         int startValue = (int)startObject;
         int endValue = (int)endObject;
 
-        Variable? variable = innerContext.VariableContext.Variables.Find(variable => variable.Identifier == VariableIdentifier);
+        Variable? variable = innerContext.VariableContext.GlobalVariables.Find(variable => variable.Identifier == VariableIdentifier);
         if (variable == null)
         {
             variable = new Variable(VariableIdentifier, typeof(int), new IntExpression(startValue, RowNumber), innerContext);

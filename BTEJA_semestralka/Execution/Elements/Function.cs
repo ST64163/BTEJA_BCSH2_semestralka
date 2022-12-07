@@ -33,19 +33,14 @@ internal class Function : ExecutionElement
         if (CurrentRepetition++ >= outerContext.RepetitionLimit)
             throw new Exceptions.StackOverflowException("Function invocation caused stack to overflow", rowNumber);
         ExecutionContext innerContext = outerContext.CreateInnerContext(this);
-
-        Debug.Write("DEBUG - Function - Call " + Identifier + "(");
         InsertParameters(innerContext, parameters, true, rowNumber);
-        Debug.Write(") ");
 
         object result = Block.Execute(innerContext);
         if (result is not ReturnStatement)
             throw new Exception("Unexpected behaviour");
         CurrentRepetition = 0;
-        Debug.WriteLine("=> " + ((ReturnStatement)result).GetValue());
         return ((ReturnStatement)result).GetValue()
             ?? throw new Exception("Unexpected behaviour");
-            //?? ((ReturnStatement)result).Expression.Execute(innerContext); TODO - pouzit ci smazat
     }
 
     internal Type Analyze(ExecutionContext outerContext, List<Expression> parameters, int rowNumber)
@@ -79,7 +74,6 @@ internal class Function : ExecutionElement
                 value = expression.Execute(context);
                 type = value.GetType();
                 parameter.Expression = new LiteralExpression(value, rowNumber);
-                Debug.Write(parameter.Identifier + " = [" + value + "], ");
             }
             else
             { 

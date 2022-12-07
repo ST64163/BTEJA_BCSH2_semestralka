@@ -1,7 +1,6 @@
 ﻿using InterpreterSK.Execution.Elements;
-using InterpreterSK.Execution.Library;
 
-namespace InterpreterSK.Execution;
+namespace InterpreterSK.Execution.Library;
 
 internal class LibraryContext : FunctionContext
 {
@@ -17,7 +16,7 @@ internal class LibraryContext : FunctionContext
                         ? Activator.CreateInstance(type, interpreter)
                         : Activator.CreateInstance(type);
                     if (function != null)
-                        Functions.Add((LibraryFunction)function);
+                        GlobalFunctions.Add((LibraryFunction)function);
                 }
             });
     }

@@ -1,6 +1,6 @@
 ﻿using InterpreterSK;
 
-string sourceFile = "..\\..\\..\\_Documents\\Priklad 3.txt";
+string sourceFile = "..\\..\\..\\_Documents\\Priklad 2.txt";
 string sourceCode = File.ReadAllText(sourceFile);
 Interpreter interpreter = new();
 interpreter.WriteEvent += (object sender, string message) => { Console.Write(message); };

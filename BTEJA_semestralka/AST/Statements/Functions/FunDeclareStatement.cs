@@ -51,7 +51,7 @@ internal class FunDeclareStatement : FunStatement
         foreach (var parameter in Parameters)
             if (Parameters.Where(param => parameter.Identifier == param.Identifier).Count() > 1)
                 throw new Exceptions.InvalidSyntaxException($"Cannot declare two parameters with same name: {parameter.Identifier}", parameter.RowNumber);
-        List<Function> functions = context.FunctionContext.Functions;
+        List<Function> functions = context.FunctionContext.GlobalFunctions;
         foreach (var function in functions)
             if (functions.Where(fun => fun.Identifier == function.Identifier && fun.Context == function.Context).Count() > 1)
                 throw new Exceptions.InvalidSyntaxException($"Cannot declare two functions in the same context with the same name: {function.Identifier}", RowNumber);
