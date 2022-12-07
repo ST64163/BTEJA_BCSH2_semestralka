@@ -13,7 +13,11 @@ internal class DivideExpression : BinaryExpression
     }
 
     protected override object Execution(Execution.ExecutionContext context, object leftValue, object rightValue)
-        => (leftValue.GetType() == typeof(double))
-        ? (double)leftValue / (double)rightValue
-        : (int)leftValue * (int)rightValue;
+    {
+        if ((double)rightValue == 0)
+            throw new Exceptions.InvalidOperationException("Cannot divide with 0", RowNumber);
+        return (leftValue.GetType() == typeof(double))
+            ? (double)leftValue / (double)rightValue
+            : (int)leftValue / (int)rightValue;
+    } 
 }

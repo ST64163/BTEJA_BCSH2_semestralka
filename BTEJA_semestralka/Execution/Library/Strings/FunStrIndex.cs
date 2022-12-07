@@ -7,8 +7,8 @@ namespace InterpreterSK.Execution.Library.Strings;
 internal class FunStrIndex : LibraryFunction
 {
     public FunStrIndex() : base("strIndex", typeof(string), new() {
-        new Variable("string", typeof(string), null),
-        new Variable("index", typeof(int), null),
+        new Variable("string", typeof(string)),
+        new Variable("index", typeof(int)),
     }) {}
 
     protected override object GetResult(ExecutionContext context)

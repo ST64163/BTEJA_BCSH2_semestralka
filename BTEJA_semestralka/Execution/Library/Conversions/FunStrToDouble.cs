@@ -7,7 +7,7 @@ namespace InterpreterSK.Execution.Library.Conversions;
 
 internal class FunStrToDouble : LibraryFunction
 {
-    public FunStrToDouble() : base("strToDouble", typeof(double), new() {new Variable("string", typeof(string), null)}) {}
+    public FunStrToDouble() : base("strToDouble", typeof(double), new() {new Variable("string", typeof(string))}) {}
 
     protected override object GetResult(ExecutionContext context)
     {

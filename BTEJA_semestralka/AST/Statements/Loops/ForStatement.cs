@@ -27,17 +27,8 @@ internal class ForStatement : LoopStatement
         Type startType = Start.Analyze(innerContext);
         Type endType = End.Analyze(innerContext);
         CheckStartEnd(startType, endType);
-        Variable? variable = innerContext.VariableContext.GlobalVariables.Find(variable => variable.Identifier == VariableIdentifier);
-        if (variable == null)
-        {
-            variable = new Variable(VariableIdentifier, typeof(int), Start, innerContext);
-            innerContext.VariableContext.AddVariable(variable);
-        }
-        else
-        { 
-            CheckVariable(variable.Datatype);
-            variable.Expression = Start;
-        }
+        Variable variable = new(VariableIdentifier, typeof(int), Start, true);
+        innerContext.VariableContext.AddVariable(variable, RowNumber);
         Statement.Analyze(innerContext);
     }
 
@@ -51,17 +42,8 @@ internal class ForStatement : LoopStatement
         int startValue = (int)startObject;
         int endValue = (int)endObject;
 
-        Variable? variable = innerContext.VariableContext.GlobalVariables.Find(variable => variable.Identifier == VariableIdentifier);
-        if (variable == null)
-        {
-            variable = new Variable(VariableIdentifier, typeof(int), new IntExpression(startValue, RowNumber), innerContext);
-            innerContext.VariableContext.AddVariable(variable);
-        }
-        else
-        { 
-            CheckVariable(variable.Datatype);
-            variable.Expression = new IntExpression(startValue, RowNumber);
-        }
+        Variable variable = new(VariableIdentifier, typeof(int), new IntExpression(startValue, RowNumber), true);
+        innerContext.VariableContext.AddVariable(variable, RowNumber);
 
         for (int i = startValue; i < endValue; i++)
         {
@@ -83,11 +65,5 @@ internal class ForStatement : LoopStatement
     {
         if (startType != typeof(int) || endType != typeof(int))
             throw new Exceptions.InvalidDatatypeException("For statement condition is defined only for Int datatypes", RowNumber);
-    }
-
-    private void CheckVariable(Type variableType)
-    {
-        if (variableType != typeof(int))
-            throw new Exceptions.InvalidDatatypeException("For statement variable must be of Int datatype", RowNumber);
     }
 }

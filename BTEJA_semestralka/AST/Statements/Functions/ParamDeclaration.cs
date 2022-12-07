@@ -15,7 +15,7 @@ internal class ParamDeclaration : Node
     }
 
     internal override object Execute(Execution.ExecutionContext context)
-        => new Variable(Identifier, Datatype, null, context);
+        => new Variable(Identifier, Datatype);
 
     internal override Type Analyze(Execution.ExecutionContext context)
         => Datatype;

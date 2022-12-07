@@ -14,15 +14,8 @@ internal class Function : ExecutionElement
 
     private static int CurrentRepetition { get; set; } = 0;
 
-    internal Function(string identifier, Type datatype, List<Variable> parameters, BlockStatement block, ExecutionContext context) 
-        : base(identifier, datatype, context) 
-    {
-        Parameters = parameters;
-        Block = block;
-    }
-
-    protected Function(string identifier, Type datatype, List<Variable> parameters, BlockStatement block)
-        : base(identifier, datatype, null)
+    internal Function(string identifier, Type datatype, List<Variable> parameters, BlockStatement block) 
+        : base(identifier, datatype) 
     {
         Parameters = parameters;
         Block = block;
@@ -82,7 +75,7 @@ internal class Function : ExecutionElement
             }
             if (parameter.Datatype != type)
                 throw new Exceptions.InvalidDatatypeException("Cannot assign expression to parameter of different datatype", expression.RowNumber);
-            context.VariableContext.AddVariable(parameter);
+            context.VariableContext.AddVariable(parameter, rowNumber);
         }
     }
 }

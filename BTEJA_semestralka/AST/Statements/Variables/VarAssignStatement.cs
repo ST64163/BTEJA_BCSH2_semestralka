@@ -1,5 +1,4 @@
 ﻿using InterpreterSK.AST.Expressions;
-using InterpreterSK.AST.Expressions.Level6;
 using InterpreterSK.Execution.Elements;
 
 namespace InterpreterSK.AST.Statements.Variables;
@@ -19,6 +18,8 @@ internal class VarAssignStatement : VarStatement
         Type type = Expression.Analyze(context.CreateInnerContext(context.BranchOwner));
         if (variable.Datatype != type)
             throw new Exceptions.InvalidDatatypeException("Cannot assign expression to variable of different datatype", RowNumber);
+        if (variable.IsConstant)
+            throw new Exceptions.InvalidOperationException("Cannot assign to a constant variable", RowNumber);
         if (execute)
         {
             object value = Expression.Execute(context);

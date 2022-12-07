@@ -5,7 +5,7 @@ namespace InterpreterSK.Execution.Library.Strings;
 
 internal class FunStrLen : LibraryFunction
 {
-    public FunStrLen() : base("strLen", typeof(int), new() {new Variable("string", typeof(string), null)}) {}
+    public FunStrLen() : base("strLen", typeof(int), new() {new Variable("string", typeof(string))}) {}
 
     protected override object GetResult(ExecutionContext context)
     {

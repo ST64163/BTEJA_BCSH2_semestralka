@@ -21,16 +21,15 @@ internal class FunDeclareStatement : FunStatement
 
     protected override void Analyzation(ExecutionContext outerContext)
     {
-
         List<Variable> parameters = new();
         Parameters.ForEach(
             parameter => parameters.Add((Variable)parameter.Execute(outerContext)));
-        CheckNames(outerContext);
-        Function function = new(Identifier, ReturnType, parameters, Block, outerContext);
-        outerContext.FunctionContext.AddFunction(function);
+        CheckParamNames();
+        Function function = new(Identifier, ReturnType, parameters, Block);
+        outerContext.FunctionContext.AddFunction(function, RowNumber);
 
         ExecutionContext innerContext = outerContext.CreateInnerContext(function);
-        parameters.ForEach(variable => innerContext.VariableContext.AddVariable(variable));
+        parameters.ForEach(variable => innerContext.VariableContext.AddVariable(variable, RowNumber));
         Block.Analyze(innerContext);
         if (!Block.EndsInReturn(innerContext, ReturnType))
             throw new Exceptions.InvalidSyntaxException("Not all paths in function return value", RowNumber);
@@ -41,20 +40,17 @@ internal class FunDeclareStatement : FunStatement
         List<Variable> parameters = new();
         Parameters.ForEach(
             parameter => parameters.Add((Variable)parameter.Execute(context)));
-        Function function = new(Identifier, ReturnType, parameters, Block, context);
-        context.FunctionContext.AddFunction(function);
+        Function function = new(Identifier, ReturnType, parameters, Block);
+        context.FunctionContext.AddFunction(function, RowNumber);
         return this;
     }
 
-    private void CheckNames(ExecutionContext context) 
+    private void CheckParamNames() 
     {
-        foreach (var parameter in Parameters)
-            if (Parameters.Where(param => parameter.Identifier == param.Identifier).Count() > 1)
-                throw new Exceptions.InvalidSyntaxException($"Cannot declare two parameters with same name: {parameter.Identifier}", parameter.RowNumber);
-        List<Function> functions = context.FunctionContext.GlobalFunctions;
-        foreach (var function in functions)
-            if (functions.Where(fun => fun.Identifier == function.Identifier && fun.Context == function.Context).Count() > 1)
-                throw new Exceptions.InvalidSyntaxException($"Cannot declare two functions in the same context with the same name: {function.Identifier}", RowNumber);
+        foreach (var param1 in Parameters)
+            foreach (var param2 in Parameters)
+                if (param1 != param2 && param1.Identifier == param2.Identifier)
+                    throw new Exceptions.InvalidSyntaxException($"Cannot declare two parameters with same name: {param2.Identifier}", param2.RowNumber);        
     }
 
     internal override string GetToString(int level, out bool isLeaf)

@@ -11,6 +11,8 @@ public delegate string ReadHandler(object sender);
 
 public class Interpreter
 {
+    private static bool printLogs = true;
+
     private readonly Lexer lexer;
     private readonly Parser parser;
 
@@ -52,32 +54,22 @@ public class Interpreter
     {
         try
         {
-            WriteLine("~ Build start");
+            if (printLogs) 
+                WriteLine("~ Build start");
             sourceCode = code;
             lexer.LoadProgram(code, out List<Token> tokens);
-            /*
-            tokens.ForEach(token =>
-                    {
-                        string tokenString = token.ToString();
-                        string valueString = "";
-                        if (token is IdentifierToken || token is IntToken || token is DoubleToken || token is BoolToken || token is StringToken)
-                            valueString = " - " + token.Value?.ToString();
-                        if (token is ReservedToken || token is OperatorToken)
-                            valueString = " - " + Token.TokenTypeToString.GetValueOrDefault(token.TokenType);
-                        Write(tokenString + valueString);
-                    });
-            */
-            WriteLine("~ Lexical analysis: OK");
+            if (printLogs) 
+                WriteLine("~ Lexical analysis: OK");
             parser.Parse(tokens, out BlockStatement program);
-            /*
-             Write(program.ToString());
-             */
-            WriteLine("~ Parsing: OK");
+            if (printLogs) 
+                WriteLine("~ Parsing: OK");
             ExecutionContext globalContext = new(this);
             program.Analyze(globalContext);
-            WriteLine("~ Semantic analysis: OK");
+            if (printLogs) 
+                WriteLine("~ Semantic analysis: OK");
 
-            WriteLine("~ Build complete");
+            if (printLogs) 
+                WriteLine("~ Build complete");
             return program;
         }
         catch (Exception e)
@@ -92,7 +84,8 @@ public class Interpreter
     {
         try
         {
-            WriteLine("~ Program: ");
+            if (printLogs) 
+                WriteLine("~ Program: ");
             program.Execute(new(this));
         }
         catch (Exception e)

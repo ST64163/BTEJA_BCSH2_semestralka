@@ -22,8 +22,11 @@ internal class VariableContext
         return variable;
     }
 
-    internal void AddVariable(Variable newVariable)
+    internal void AddVariable(Variable newVariable, int rowNumber)
     {
+        foreach (var variable in LocalVariables)
+            if (variable.Identifier == newVariable.Identifier)
+                throw new Exceptions.InvalidSyntaxException($"Cannot declare two functions in the same context with the same name: {newVariable.Identifier}", rowNumber);
         LocalVariables.Add(newVariable);
     }
 

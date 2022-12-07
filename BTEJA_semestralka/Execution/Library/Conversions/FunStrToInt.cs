@@ -7,7 +7,7 @@ namespace InterpreterSK.Execution.Library.Conversions;
 
 internal class FunStrToInt : LibraryFunction
 {
-    public FunStrToInt() : base("strToInt", typeof(int), new() {new Variable("string", typeof(string), null)}) {}
+    public FunStrToInt() : base("strToInt", typeof(int), new() {new Variable("string", typeof(string))}) {}
 
     protected override object GetResult(ExecutionContext context)
     {

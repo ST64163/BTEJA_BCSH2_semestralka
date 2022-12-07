@@ -5,7 +5,7 @@ namespace InterpreterSK.Execution.Library.Conversions;
 
 internal class FunBoolToStr : LibraryFunction
 {
-    public FunBoolToStr() : base("boolToStr", typeof(string), new() {new Variable("bool", typeof(bool), null)}) {}
+    public FunBoolToStr() : base("boolToStr", typeof(string), new() {new Variable("bool", typeof(bool))}) {}
 
     protected override object GetResult(ExecutionContext context)
     {

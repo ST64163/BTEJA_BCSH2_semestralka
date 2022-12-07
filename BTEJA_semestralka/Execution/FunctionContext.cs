@@ -1,5 +1,6 @@
 ﻿using InterpreterSK.Execution.Elements;
 using InterpreterSK.Execution.Library;
+using System;
 
 namespace InterpreterSK.Execution;
 
@@ -32,8 +33,11 @@ internal class FunctionContext
         return function;
     }
 
-    internal void AddFunction(Function newFunction)
+    internal void AddFunction(Function newFunction, int rowNumber)
     {
+        foreach (var function in LocalFunctions)
+            if (function.Identifier == newFunction.Identifier)
+                throw new Exceptions.InvalidSyntaxException($"Cannot declare two functions in the same context with the same name: {newFunction.Identifier}", rowNumber);
         LocalFunctions.Add(newFunction);
     }
 
@@ -59,9 +63,9 @@ internal class FunctionContext
                 List<Variable> parameters = new();
                 oldFunction.Parameters.ForEach(
                     parameter => parameters.Add(
-                        new Variable(parameter.Identifier, parameter.Datatype, null, oldFunction.Context ?? context)));
+                        new Variable(parameter.Identifier, parameter.Datatype)));
                 newFunctions.Add(
-                    new Function(oldFunction.Identifier, oldFunction.Datatype, parameters, oldFunction.Block, oldFunction.Context ?? context));
+                    new Function(oldFunction.Identifier, oldFunction.Datatype, parameters, oldFunction.Block));
             });
         return new FunctionContext(newFunctions);
     }

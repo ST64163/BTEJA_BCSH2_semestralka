@@ -8,7 +8,7 @@ internal class FunPrintLn : LibraryFunction
     private readonly Interpreter interpreter;
 
     public FunPrintLn(Interpreter interpreter) 
-        : base("printLn", typeof(void), new() { new Variable("message", typeof(string), null) }) 
+        : base("printLn", typeof(void), new() { new Variable("message", typeof(string)) }) 
     {
         this.interpreter = interpreter;
     }
