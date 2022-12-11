@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-
+﻿
 namespace InterpreterSK.Execution.Library.IO;
 
 internal class FunReadLn : LibraryFunction

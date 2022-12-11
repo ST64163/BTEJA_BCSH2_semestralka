@@ -13,4 +13,10 @@
     <ProjectReference Include="..\BTEJA_semestralka\BTEJA_semestralka.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="AvalonEdit" Version="6.2.0.78" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
+  </ItemGroup>
+
 </Project>
