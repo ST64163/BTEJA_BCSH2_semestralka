@@ -11,8 +11,6 @@ public delegate string ReadHandler(object sender);
 
 public class Interpreter
 {
-    private static bool printLogs = true;
-
     private readonly Lexer lexer;
     private readonly Parser parser;
 
@@ -21,6 +19,10 @@ public class Interpreter
 
     public event WriteHandler? WriteEvent;
     public event ReadHandler? ReadLineEvent;
+
+
+    private bool printLogs = true;
+    public bool PrintLogs { get => printLogs; set => printLogs = value; }
 
     public Interpreter()
     {
@@ -46,8 +48,12 @@ public class Interpreter
     public void Build(string code)
     {
         if (code != string.Empty)
+        {
             if (sourceCode == null || sourceCode != code || builtProgram == null)
                 builtProgram = Rebuild(code);
+            else if (printLogs)
+                WriteLine("~ Already Built");
+        }
     }
 
     private BlockStatement? Rebuild(string code)

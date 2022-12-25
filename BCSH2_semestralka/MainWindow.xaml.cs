@@ -1,4 +1,5 @@
 ﻿
+using System;
 using System.Windows;
 
 namespace BTEJA_BCSH2_semestralka;
@@ -13,5 +14,6 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         DataContext = App.Current.MainMV;
+        textBox_console.TextChanged += (sender, args) => textBox_console.ScrollToEnd();
     }
 }

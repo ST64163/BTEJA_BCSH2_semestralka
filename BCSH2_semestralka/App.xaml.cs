@@ -15,9 +15,6 @@ public partial class App : Application
     public MainViewModel MainMV => Services.GetService<MainViewModel>() 
         ?? throw new NullReferenceException();
 
-    public FileViewModel FileMV => Services.GetService<FileViewModel>()
-        ?? throw new NullReferenceException();
-
     public App()
     {
         Services = ConfigureServices();
@@ -29,7 +26,6 @@ public partial class App : Application
 
         services.AddSingleton<Interpreter>();
         services.AddSingleton<MainViewModel>();
-        services.AddSingleton<FileViewModel>();
 
         return services.BuildServiceProvider();
     }

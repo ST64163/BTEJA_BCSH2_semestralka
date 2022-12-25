@@ -11,12 +11,14 @@
     <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_File">
-                <MenuItem Header="_Load" Command="{Binding LoadCommand}"/>
+                <MenuItem Header="_Load..." Command="{Binding LoadCommand}"/>
+                <Separator />
                 <MenuItem Header="_Save" Command="{Binding SaveCommand}"/>
+                <MenuItem Header="_Save As..." Command="{Binding SaveCommand}"/>
             </MenuItem>
             <MenuItem Header="_Help">
-                <MenuItem Header="_Grammar" />
-                <MenuItem Header="_Library_Functions" />
+                <MenuItem Header="_Grammar..." />
+                <MenuItem Header="_Library Functions..." />
             </MenuItem>
         </Menu>
 
@@ -33,11 +35,14 @@
             </Grid.ColumnDefinitions>
 
             <Label Grid.Row="0" Grid.Column="0">Code Editor</Label>
-            <TextBox x:Name="textBox_editor" Grid.Row="1" Grid.Column="0"/>
             <!--
-            <avalon:TextEditor x:Name="textBox_editor" ShowLineNumbers="True"
-                               Grid.Row="1" Grid.Column="0" Margin="10,10,10,10"/>
+            <TextBox x:Name="textBox_editor" Grid.Row="1" Grid.Column="0"
+                     Text="{Binding Path=CodeText}"/>
             -->
+            <avalon:TextEditor x:Name="textBox_editor" ShowLineNumbers="True"
+                               Grid.Row="1" Grid.Column="0" Margin="10,10,10,10"
+                               Document="{Binding Path=Code, Mode=TwoWay}"/>
+            
             
             <StackPanel x:Name="stackPanel_centralButtons" Grid.Row="1" Grid.Column="1">
                 <Button x:Name="button_build" 
