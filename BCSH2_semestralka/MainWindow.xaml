@@ -4,15 +4,15 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
         xmlns:avalon="http://icsharpcode.net/sharpdevelop/avalonedit" 
-        xmlns:viewmodel="clr-namespace:IdeSK.ViewModel" d:DataContext="{d:DesignInstance Type=viewmodel:InterpreterViewModel}"
+        xmlns:viewmodel="clr-namespace:IdeSK.ViewModel" d:DataContext="{d:DesignInstance Type=viewmodel:MainViewModel}"
         mc:Ignorable="d"
         Title="SubKotlin IDE"
         Height="450" Width="800">
     <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_File">
-                <MenuItem Header="_Load" />
-                <MenuItem Header="_Save" />
+                <MenuItem Header="_Load" Command="{Binding LoadCommand}"/>
+                <MenuItem Header="_Save" Command="{Binding SaveCommand}"/>
             </MenuItem>
             <MenuItem Header="_Help">
                 <MenuItem Header="_Grammar" />
@@ -62,9 +62,9 @@
             <Setter Property="Background" Value="#FF2A2B2B"/>
         </Style>
         <Style TargetType="Label">
-            <Setter Property="VerticalAlignment" Value="Center"></Setter>
-            <Setter Property="HorizontalAlignment" Value="Center"></Setter>
-            <Setter Property="Foreground" Value="White"></Setter>
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="Foreground" Value="White" />
             <Setter Property="FontWeight" Value="Bold" />
             <Setter Property="FontSize" Value="16" />
         </Style>
@@ -72,13 +72,13 @@
             <Setter Property="AcceptsReturn" Value="True" />
             <Setter Property="AcceptsTab" Value="True" />
             <Setter Property="TextWrapping" Value="Wrap" />
-            <Setter Property="Background" Value="White"></Setter>
-            <Setter Property="Cursor" Value="IBeam"></Setter>
+            <Setter Property="Background" Value="White" />
+            <Setter Property="Cursor" Value="IBeam" />
             <Setter Property="Margin" Value="10,0,10,10" />
         </Style>
         <Style TargetType="StackPanel">
             <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="HorizontalAlignment" Value="Center"></Setter>
+            <Setter Property="HorizontalAlignment" Value="Center" />
             <Setter Property="Margin" Value="5,0,5,0" />
         </Style>
         <Style TargetType="Button">

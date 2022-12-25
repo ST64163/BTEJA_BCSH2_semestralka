@@ -1,17 +1,17 @@
-﻿
-using System.Windows;
-using System.Windows.Controls;
+﻿using System.Windows;
 
 namespace IdeSK.View
 {
     /// <summary>
-    /// Interakční logika pro FileWindow.xaml
+    /// Interaction logic for FileWindow.xaml
     /// </summary>
-    public partial class FileWindow : Page
+    public partial class FileWindow : Window
     {
-        public FileWindow()
+        public FileWindow(bool load)
         {
             InitializeComponent();
+            Title = load ? "Load File" : "Save File";
+            button_execute.Content = load ? "Load" : "Save";
         }
     }
 }

@@ -5,8 +5,27 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:IdeSK.View"
         mc:Ignorable="d"
-        Title="InputWindow" Height="450" Width="800">
-    <Grid>
-        
-    </Grid>
+        ResizeMode="NoResize"
+        Title="Console Input" Height="125" Width="200">
+    <StackPanel>
+        <Label>Your input:</Label>
+        <TextBox  x:Name="textBox_input"/>
+        <Button Content="Insert"
+                Command="{Binding }"
+                CommandParameter="{Binding ElementName=textBox_input, Path=Text}"/>
+    </StackPanel>
+
+    <Window.Resources>
+        <Style TargetType="Label">
+            <Setter Property="FontWeight" Value="DemiBold" />
+        </Style>
+        <Style TargetType="Button">
+            <Setter Property="Margin" Value="5" />
+            <Setter Property="Padding" Value="5" />
+            <Setter Property="FontWeight" Value="DemiBold" />
+        </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="Margin" Value="5,0,5,0"/>
+        </Style>
+    </Window.Resources>
 </Window>

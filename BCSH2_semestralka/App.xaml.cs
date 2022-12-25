@@ -6,13 +6,16 @@ using System.Windows;
 
 namespace BTEJA_BCSH2_semestralka;
 
-public partial class App
+public partial class App : Application
 {
     public new static App Current => (App)Application.Current;
     
     public IServiceProvider Services { get; }
 
-    public InterpreterViewModel InterpreterMV => Services.GetService<InterpreterViewModel>() 
+    public MainViewModel MainMV => Services.GetService<MainViewModel>() 
+        ?? throw new NullReferenceException();
+
+    public FileViewModel FileMV => Services.GetService<FileViewModel>()
         ?? throw new NullReferenceException();
 
     public App()
@@ -25,7 +28,8 @@ public partial class App
         var services = new ServiceCollection();
 
         services.AddSingleton<Interpreter>();
-        services.AddSingleton<InterpreterViewModel>();
+        services.AddSingleton<MainViewModel>();
+        services.AddSingleton<FileViewModel>();
 
         return services.BuildServiceProvider();
     }
