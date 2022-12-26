@@ -11,14 +11,14 @@
     <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_File">
-                <MenuItem Header="_Load..." Command="{Binding LoadCommand}"/>
+                <MenuItem Header="_Load ..." Command="{Binding LoadCommand}"/>
                 <Separator />
-                <MenuItem Header="_Save" Command="{Binding SaveCommand}"/>
-                <MenuItem Header="_Save As..." Command="{Binding SaveCommand}"/>
+                <MenuItem Header="_Save ..." Command="{Binding SaveCommand}"/>
+                <MenuItem Header="_Save As ..." Command="{Binding SaveAsCommand}"/>
             </MenuItem>
             <MenuItem Header="_Help">
-                <MenuItem Header="_Grammar..." />
-                <MenuItem Header="_Library Functions..." />
+                <MenuItem Header="_Grammar ..." />
+                <MenuItem Header="_Library Functions ..." />
             </MenuItem>
         </Menu>
 
@@ -29,9 +29,9 @@
             </Grid.RowDefinitions>
 
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" MinWidth="300" />
                 <ColumnDefinition Width="auto"/>
-                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="auto" MinWidth="250" />
             </Grid.ColumnDefinitions>
 
             <Label Grid.Row="0" Grid.Column="0">Code Editor</Label>
@@ -56,7 +56,7 @@
             </StackPanel>
 
             <Label Grid.Row="0" Grid.Column="2">Console</Label>
-            <TextBox x:Name="textBox_console" Grid.Row="1" Grid.Column="2" 
+            <TextBox x:Name="textBox_console" Grid.Row="1" Grid.Column="2"
                      Background="#FF595959" Foreground="AntiqueWhite" IsReadOnly="True"
                      Text="{Binding Path=ConsoleOutput}"/>
         </Grid>

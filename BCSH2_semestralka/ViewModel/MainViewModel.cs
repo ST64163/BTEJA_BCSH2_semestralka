@@ -1,4 +1,5 @@
 ﻿
+using BTEJA_BCSH2_semestralka;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ICSharpCode.AvalonEdit.Document;
@@ -8,6 +9,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Windows.Threading;
 using MessageBox = System.Windows.Forms.MessageBox;
 
 namespace IdeSK.ViewModel;
@@ -76,29 +78,38 @@ public class MainViewModel : ObservableObject
         SaveAsCommand = new RelayCommand(DoSaveAs);
     }
 
-    private void WriteCallback(object sender, string message) => ConsoleOutput += message;
-    private string ReadCallback(object sender)
-    {
-        InputWindow inputWindow = new();
-        if (inputWindow.ShowDialog() == true)
+    private void WriteCallback(object sender, string message) 
+        => App.Current.Dispatcher.Invoke(() =>
         {
-            string input = "inputWindow.input"; // TODO
+            lock (ConsoleOutput)
+                ConsoleOutput += message;
+        });
+
+    private string ReadCallback(object sender)
+        => App.Current.Dispatcher.Invoke(GetInputFromDialog).Result;
+
+    private async Task<string> GetInputFromDialog()
+    {
+        Task<string> task = Task<string>.Factory.StartNew(() => 
+        {
+            InputDialog inputDialog = new(); // { Owner = App.Current.MainWindow };
+            return (inputDialog.ShowDialog() == true) ? inputDialog.Input : "";
+        });
+        string input = await task.ConfigureAwait(false);
+        lock (ConsoleOutput)
             ConsoleOutput += input + "\n";
-            return input;
-        }
-        ConsoleOutput += "\n";
-        return "";
+        return input;
     }
 
-    private void DoBuild(string code) => RunInterpreterTask(code, false);
+    private void DoBuild(string code) => RunInterpreterTask(false);
 
-    private void DoInterpret(string code) => RunInterpreterTask(code, true);
+    private void DoInterpret(string code) => RunInterpreterTask(true);
 
-    private void RunInterpreterTask(string _, bool interpret)
+    private void RunInterpreterTask(bool interpret)
     {
-        string code = CodeText; // avalon editor
         ClearInterpreterTask();
         CancellationTokenSource cts = new();
+        string code = CodeText;
         Task task = Task.Factory.StartNew(() =>
         {
             if (interpret)
@@ -127,7 +138,7 @@ public class MainViewModel : ObservableObject
 
     private void DoLoad()
     {
-        OpenFileDialog dialog = new() { FileName = fileName ?? "", DefaultExt = "txt" };
+        OpenFileDialog dialog = new() { Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*" };
         if (dialog.ShowDialog() == DialogResult.OK)
         {
             try
@@ -154,7 +165,7 @@ public class MainViewModel : ObservableObject
 
     private void DoSaveAs()
     {
-        SaveFileDialog dialog = new() { FileName = fileName ?? "", DefaultExt = "txt" };
+        SaveFileDialog dialog = new() { Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*" };
         if (dialog.ShowDialog() == DialogResult.OK)
             SaveCodeToFile(dialog.FileName);
     }
@@ -167,6 +178,7 @@ public class MainViewModel : ObservableObject
             if (filename != null)
             {
                 File.WriteAllText(filename, CodeText);
+                fileName = filename;
                 invalid = false;
             }
         }
