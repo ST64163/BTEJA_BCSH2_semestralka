@@ -26,6 +26,7 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
             <Grid.ColumnDefinitions>
@@ -40,11 +41,11 @@
                      Text="{Binding Path=CodeText}"/>
             -->
             <avalon:TextEditor x:Name="textBox_editor" ShowLineNumbers="True"
-                               Grid.Row="1" Grid.Column="0" Margin="10,10,10,10"
+                               Grid.Row="1" Grid.Column="0" Grid.RowSpan="2" Margin="10,10,10,10"
                                Document="{Binding Path=Code, Mode=TwoWay}"/>
             
             
-            <StackPanel x:Name="stackPanel_centralButtons" Grid.Row="1" Grid.Column="1">
+            <StackPanel x:Name="stackPanel_centralButtons" Grid.Row="1" Grid.Column="1" Grid.RowSpan="2">
                 <Button x:Name="button_build" 
                         Content="Build" 
                         Command="{Binding BuildCommand}" 
@@ -59,6 +60,24 @@
             <TextBox x:Name="textBox_console" Grid.Row="1" Grid.Column="2"
                      Background="#FF595959" Foreground="AntiqueWhite" IsReadOnly="True"
                      Text="{Binding Path=ConsoleOutput}"/>
+            
+            <Grid Grid.Row="2"  Grid.Column="2" Margin="10,0,10,10">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBox x:Name="textBox_consoleInput" Grid.Column="0"
+                         TextWrapping="NoWrap" AcceptsReturn="False" AcceptsTab="False" Margin="0"
+                         Text="{Binding Path=ConsoleInput}"/>
+                <Button x:Name="button_insertInput" Content="Insert" Grid.Column="1"
+                        HorizontalAlignment="Center" Margin="0"
+                        Command="{Binding InsertCommand}" />
+            </Grid>
         </Grid>
     </DockPanel>
 

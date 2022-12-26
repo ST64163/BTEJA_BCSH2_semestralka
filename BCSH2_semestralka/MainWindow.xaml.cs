@@ -14,6 +14,19 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         DataContext = App.Current.MainMV;
+        SetInputState(false);
         textBox_console.TextChanged += (sender, args) => textBox_console.ScrollToEnd();
+    }
+
+    public void SetInputState(bool isEnabled)
+    {
+        textBox_consoleInput.IsEnabled = isEnabled;
+        button_insertInput.IsEnabled = isEnabled;
+    }
+
+    public void SetInterpretState(bool isEnabled)
+    { 
+        button_build.IsEnabled = isEnabled;
+        button_interpret.IsEnabled = isEnabled;
     }
 }

@@ -34,14 +34,10 @@ public class Interpreter
     {
         if (code != string.Empty)
         {
-            if (sourceCode != null && sourceCode == code && builtProgram != null)
-                Execute(builtProgram);
-            else
-            {
+            if (sourceCode == null || sourceCode != code || builtProgram == null)
                 builtProgram = Rebuild(code);
-                if (builtProgram != null)
-                    Execute(builtProgram);
-            }
+            if (builtProgram != null)
+                Execute(builtProgram);
         }
     }
 
@@ -98,6 +94,7 @@ public class Interpreter
         {
             WriteLine(e.Message);
         }
+        builtProgram = null; // execution modifies the AST
     }
 
     internal string ReadLine()

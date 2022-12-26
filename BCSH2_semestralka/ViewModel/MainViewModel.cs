@@ -1,11 +1,11 @@
-﻿
-using BTEJA_BCSH2_semestralka;
+﻿using BTEJA_BCSH2_semestralka;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ICSharpCode.AvalonEdit.Document;
-using IdeSK.View;
 using InterpreterSK;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -16,12 +16,13 @@ namespace IdeSK.ViewModel;
 
 public class MainViewModel : ObservableObject
 {
-    private (Task, CancellationTokenSource)? currentInterpreterTask;
+    private Task? currentInterpreterTask;
     private readonly Interpreter interpreter;
     private string? fileName;
 
     private string _output;
     private TextDocument _code;
+    private string _input;
 
     public string ConsoleOutput
     {
@@ -32,6 +33,18 @@ public class MainViewModel : ObservableObject
             OnPropertyChanged();
         }
     }
+
+    public string ConsoleInput
+    {
+        get => _input;
+        set
+        {
+            _input = value;
+            OnPropertyChanged();
+        }
+    }
+
+    private bool IsInsertClicked { get; set; } = false;
 
     public TextDocument Code
     {
@@ -53,15 +66,17 @@ public class MainViewModel : ObservableObject
         }
     }
 
-    public IRelayCommand<string> BuildCommand { get; }
-    public IRelayCommand<string> InterpretCommand { get; }
+    public IRelayCommand BuildCommand { get; }
+    public IRelayCommand InterpretCommand { get; }
     public IRelayCommand LoadCommand { get; }
     public IRelayCommand SaveCommand { get; }
     public IRelayCommand SaveAsCommand { get; }
+    public IRelayCommand InsertCommand { get; }
 
     public MainViewModel()
     {
         _output = string.Empty;
+        _input = string.Empty;
         _code = new();
 
         fileName = null;
@@ -71,69 +86,55 @@ public class MainViewModel : ObservableObject
         interpreter.WriteEvent += WriteCallback;
         interpreter.ReadLineEvent += ReadCallback;
 
-        BuildCommand = new RelayCommand<string>(DoBuild);
-        InterpretCommand = new RelayCommand<string>(DoInterpret);
+        BuildCommand = new RelayCommand(DoBuild);
+        InterpretCommand = new RelayCommand(DoInterpret);
         LoadCommand = new RelayCommand(DoLoad);
         SaveCommand = new RelayCommand(DoSave);
         SaveAsCommand = new RelayCommand(DoSaveAs);
+        InsertCommand = new RelayCommand(DoInsert);
     }
 
-    private void WriteCallback(object sender, string message) 
-        => App.Current.Dispatcher.Invoke(() =>
-        {
-            lock (ConsoleOutput)
-                ConsoleOutput += message;
-        });
+    // MODEL - INTERPRETER CALLBACKS
+
+    private void WriteCallback(object sender, string message)
+        => ConsoleOutput += message;
 
     private string ReadCallback(object sender)
-        => App.Current.Dispatcher.Invoke(GetInputFromDialog).Result;
-
-    private async Task<string> GetInputFromDialog()
     {
-        Task<string> task = Task<string>.Factory.StartNew(() => 
-        {
-            InputDialog inputDialog = new(); // { Owner = App.Current.MainWindow };
-            return (inputDialog.ShowDialog() == true) ? inputDialog.Input : "";
-        });
-        string input = await task.ConfigureAwait(false);
-        lock (ConsoleOutput)
-            ConsoleOutput += input + "\n";
-        return input;
+        App.Current.Dispatcher.Invoke(EnableInput);
+        ConsoleInput = string.Empty;
+        IsInsertClicked = false;
+        while (!IsInsertClicked)
+            Thread.Sleep(250);
+        ConsoleOutput += ConsoleInput + "\n";
+        App.Current.Dispatcher.Invoke(DisableInput);
+        return ConsoleInput;
     }
 
-    private void DoBuild(string code) => RunInterpreterTask(false);
+    // VIEW - RELAY COMMANDS 
 
-    private void DoInterpret(string code) => RunInterpreterTask(true);
+    private void DoInsert() => IsInsertClicked = true;
+
+    private void DoBuild() => RunInterpreterTask(false);
+
+    private void DoInterpret() => RunInterpreterTask(true);
 
     private void RunInterpreterTask(bool interpret)
     {
-        ClearInterpreterTask();
-        CancellationTokenSource cts = new();
         string code = CodeText;
-        Task task = Task.Factory.StartNew(() =>
+        Task? oldTask = currentInterpreterTask;
+        if (oldTask != null && oldTask.Status != TaskStatus.Running)
+            oldTask.Dispose();
+        currentInterpreterTask = Task.Factory.StartNew(() =>
         {
+            App.Current.Dispatcher.Invoke(DisableInterpreting);
             if (interpret)
                 interpreter.Interpret(code);
             else
                 interpreter.Build(code);
             ConsoleOutput += "\n";
-        }, cts.Token);
-        currentInterpreterTask = (task, cts);
-    }
-
-    private void ClearInterpreterTask()
-    {
-        if (currentInterpreterTask != null) 
-        {
-            (Task task, CancellationTokenSource cts) = currentInterpreterTask.Value;
-            bool isCompleted = task.IsCompleted;
-            cts.Cancel();
-            task.Dispose();
-            cts.Dispose();
-            currentInterpreterTask = null;
-            if (!isCompleted)
-                ConsoleOutput += "Stopped!\n";
-        }
+            App.Current.Dispatcher.Invoke(EnableInterpreting);
+        });
     }
 
     private void DoLoad()
@@ -186,4 +187,22 @@ public class MainViewModel : ObservableObject
         if (invalid)
             MessageBox.Show("Cannot save code to the entered file", "Save Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
     }
+
+
+    // VIEW - WINDOW MANIPULATION
+
+    private MainWindow GetMainWindow()
+        => App.Current.Windows.OfType<MainWindow>().First();
+
+    private void EnableInput()
+        => GetMainWindow().SetInputState(true);
+
+    private void DisableInput()
+        => GetMainWindow().SetInputState(false);
+
+    private void EnableInterpreting()
+        => GetMainWindow().SetInterpretState(true);
+
+    private void DisableInterpreting()
+        => GetMainWindow().SetInterpretState(false);
 }
