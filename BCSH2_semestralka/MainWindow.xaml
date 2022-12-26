@@ -17,12 +17,17 @@
                 <MenuItem Header="_Save As ..." Command="{Binding SaveAsCommand}"/>
             </MenuItem>
             <MenuItem Header="_Help">
-                <MenuItem Header="_Grammar ..." />
-                <MenuItem Header="_Library Functions ..." />
+                <MenuItem Header="_Grammar ..." Command="{Binding ShowGrammarCommand}"/>
+                <MenuItem Header="_Library Functions ..." Command="{Binding ShowLibraryCommand}"/>
+            </MenuItem>
+            <MenuItem Header="_Settings">
+                <MenuItem Header="_Interpreter logs">
+                    <TextBlock>Show <CheckBox IsChecked="{Binding ShowLogs}" /></TextBlock>
+                </MenuItem>
             </MenuItem>
         </Menu>
 
-        <Grid>
+        <Grid DockPanel.Dock="Bottom">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
@@ -72,8 +77,8 @@
                 </Grid.ColumnDefinitions>
 
                 <TextBox x:Name="textBox_consoleInput" Grid.Column="0"
-                         TextWrapping="NoWrap" AcceptsReturn="False" AcceptsTab="False" Margin="0"
-                         Text="{Binding Path=ConsoleInput}"/>
+                         AcceptsReturn="False" AcceptsTab="False" Margin="0"
+                         Text="{Binding Path=ConsoleInput}" FontSize="14"/>
                 <Button x:Name="button_insertInput" Content="Insert" Grid.Column="1"
                         HorizontalAlignment="Center" Margin="0"
                         Command="{Binding InsertCommand}" />

@@ -2,14 +2,13 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ICSharpCode.AvalonEdit.Document;
+using IdeSK.View;
 using InterpreterSK;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Windows.Threading;
 using MessageBox = System.Windows.Forms.MessageBox;
 
 namespace IdeSK.ViewModel;
@@ -23,6 +22,7 @@ public class MainViewModel : ObservableObject
     private string _output;
     private TextDocument _code;
     private string _input;
+    private bool _showLogs;
 
     public string ConsoleOutput
     {
@@ -66,18 +66,32 @@ public class MainViewModel : ObservableObject
         }
     }
 
+    public bool ShowLogs
+    {
+        get => _showLogs;
+        set 
+        {
+            _showLogs = value;
+            interpreter.PrintLogs = value;
+            OnPropertyChanged();
+        }
+    }
+
     public IRelayCommand BuildCommand { get; }
     public IRelayCommand InterpretCommand { get; }
     public IRelayCommand LoadCommand { get; }
     public IRelayCommand SaveCommand { get; }
     public IRelayCommand SaveAsCommand { get; }
     public IRelayCommand InsertCommand { get; }
+    public IRelayCommand ShowGrammarCommand { get; }
+    public IRelayCommand ShowLibraryCommand { get; }
 
     public MainViewModel()
     {
         _output = string.Empty;
         _input = string.Empty;
         _code = new();
+        _showLogs = true;
 
         fileName = null;
         currentInterpreterTask = null;
@@ -92,6 +106,8 @@ public class MainViewModel : ObservableObject
         SaveCommand = new RelayCommand(DoSave);
         SaveAsCommand = new RelayCommand(DoSaveAs);
         InsertCommand = new RelayCommand(DoInsert);
+        ShowGrammarCommand = new RelayCommand(DoShowGrammar);
+        ShowLibraryCommand = new RelayCommand(DoShowLibrary);
     }
 
     // MODEL - INTERPRETER CALLBACKS
@@ -186,6 +202,16 @@ public class MainViewModel : ObservableObject
         catch (System.Exception) { }
         if (invalid)
             MessageBox.Show("Cannot save code to the entered file", "Save Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+    }
+
+    private void DoShowLibrary() => ShowHelpWindow("Library");
+
+    private void DoShowGrammar() => ShowHelpWindow("Grammar");
+
+    private void ShowHelpWindow(string content)
+    {
+        HelpWindow window = new(content);
+        window.Show();
     }
 
 
