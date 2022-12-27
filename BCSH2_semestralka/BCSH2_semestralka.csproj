@@ -7,7 +7,12 @@
     <UseWPF>true</UseWPF>
     <RootNamespace>IdeSK</RootNamespace>
     <AssemblyName>BCSH2_semestralka</AssemblyName>
+    <ApplicationIcon>_Documents\icon.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="_Documents\icon.ico" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\BTEJA_semestralka\BTEJA_semestralka.csproj" />
